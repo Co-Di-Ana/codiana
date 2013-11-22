@@ -1,2 +1,2 @@
-codiana Moodle Module
+CoDiAna Moodle Module
 =======
