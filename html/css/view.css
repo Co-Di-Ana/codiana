@@ -1,0 +1,43 @@
+.codiana_code_example {
+    display: block;
+    width: 100%;
+}
+
+.codiana_code_example ol li {
+    font-family: Consolas, "Courier New", Courier, monospace !important;
+    counter-increment: codiana_code_counter;
+    padding: 0;
+    margin: 0;
+    display: list-item;
+    width: 100%;
+    background-color: #eee;
+}
+
+.codiana_code_example ol li:nth-child(odd) {
+    background-color: #fff;
+}
+
+.codiana_code_example ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.codiana_code_example ol li:before {
+    display: inline-block;
+    margin-right: 5px;
+    border-right: 1px solid #666;
+    padding: 2px 8px;
+    content: counter(codiana_code_counter, decimal-leading-zero);
+    color: #333;
+}
+
+.codiana_code_wrapper {
+    margin: 20px;
+}
+
+.codiana_taskmainfilename_warning {
+    font-family: Consolas, "Courier New", Courier, monospace !important;
+    font-weight: bold;
+    font-size: 1.3em;
+}
