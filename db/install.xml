@@ -43,7 +43,6 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="extension" TYPE="unique" FIELDS="extension" COMMENT="Extensions are unique"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="codiana_attempt" COMMENT="Table of every user attempts">
