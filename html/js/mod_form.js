@@ -42,10 +42,10 @@ function replaceDiacritics(s) {
 
 $(function () {
     $('#id_name').bind("input", function (event, data) {
-        var taskmainfilename = $('#id_taskmainfilename');
+        var mainfilename = $('#id_mainfilename');
         var form = $(event.target);
         var value = toCamelCase(replaceDiacritics(form.val())).replace(/[^a-zA-Z0-9_]+/g, "");
 
-        taskmainfilename.val(value);
+        mainfilename.val(value);
     });
 });

@@ -413,7 +413,7 @@ class mod_codiana_mod_form extends moodleform_mod {
             $errors['languages'] = 'not array';
         else {
             global $DB;
-            $languages = $DB->get_records ('codiana_language', null, '', 'id');
+            $languages = $DB->get_records ('codiana_language', null, '', 'extension');
             $languages = array_keys ($languages);
             foreach ($codiana->languages as $language) {
                 if (in_array ($language, $languages) == false)
