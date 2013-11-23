@@ -40,45 +40,45 @@ $string['pluginname'] = 'codiana';
 
 
 // edit form
-$string['codiana:taskname'] = 'Task name';
-$string['codiana:taskmainfilename'] = 'Task main file name';
-$string['codiana:taskdifficulty'] = 'Task Difficulty';
-$string['codiana:taskgrademethod'] = 'Grade method';
-$string['codiana:taksgrademethod:strict'] = 'strict method';
-$string['codiana:taksgrademethod:tolerant'] = 'tolerant method';
-$string['codiana:taksgrademethod:vague'] = 'vague method';
-$string['codiana:tasklanguages'] = 'Allowed languages';
-$string['codiana:tasktimeopen'] = 'Avaiable from date';
-$string['codiana:tasktimeclose'] = 'Avaiable to date';
-$string['codiana:taskmaxusers'] = 'Max users';
-$string['codiana:taskmaxattempts'] = 'Max attempts';
-$string['codiana:tasklimittime'] = 'Time limit';
-$string['codiana:tasklimitmemory'] = 'Memory limit';
-$string['codiana:tasksolutionfile'] = 'Solution file';
-$string['codiana:taskinputfile'] = 'Input file';
-$string['codiana:taskoutputfile'] = 'Output file';
-$string['codiana:taskerrorfile'] = 'Error file';
-$string['codiana:taskinputexample'] = 'Input example';
-$string['codiana:taskoutputexample'] = 'Output example';
+$string['codiana:name'] = 'Task name';
+$string['codiana:mainfilename'] = 'Task main file name';
+$string['codiana:difficulty'] = 'Task Difficulty';
+$string['codiana:grademethod'] = 'Grade method';
+$string['codiana:grademethod:strict'] = 'strict method';
+$string['codiana:grademethod:tolerant'] = 'tolerant method';
+$string['codiana:grademethod:vague'] = 'vague method';
+$string['codiana:languages'] = 'Allowed languages';
+$string['codiana:timeopen'] = 'Avaiable from date';
+$string['codiana:timeclose'] = 'Avaiable to date';
+$string['codiana:maxusers'] = 'Max users';
+$string['codiana:maxattempts'] = 'Max attempts';
+$string['codiana:limittime'] = 'Time limit';
+$string['codiana:limitmemory'] = 'Memory limit';
+$string['codiana:solutionfile'] = 'Solution file';
+$string['codiana:inputfile'] = 'Input file';
+$string['codiana:outputfile'] = 'Output file';
+$string['codiana:errorfile'] = 'Error file';
+$string['codiana:inputexample'] = 'Input example';
+$string['codiana:outputexample'] = 'Output example';
 
 // edit form help
-$string['codiana:taskname_help'] = 'Task name help';
-$string['codiana:taskmainfilename_help'] = 'Task main file name help';
-$string['codiana:taskdifficulty_help'] = 'Difficulty help';
-$string['codiana:taskgrademethod_help'] = 'Grade method help';
-$string['codiana:tasklanguages_help'] = 'Languages help';
-$string['codiana:tasktimeopen_help'] = 'Open help';
-$string['codiana:tasktimeclose_help'] = 'Close help';
-$string['codiana:taskmaxusers_help'] = 'Max users help';
-$string['codiana:taskmaxattempts_help'] = 'Max attempts help';
-$string['codiana:tasklimittime_help'] = 'Task time limit';
-$string['codiana:tasklimitmemory_help'] = 'Task memory limit';
-$string['codiana:tasksolutionfile_help'] = 'Solution file help';
-$string['codiana:taskinputfile_help'] = 'Input file help';
-$string['codiana:taskoutputfile_help'] = 'Output file help';
-$string['codiana:taskerrorfile_help'] = 'Error file help';
-$string['codiana:taskinputexample_help'] = 'Input help';
-$string['codiana:taskoutputexample_help'] = 'Output help';
+$string['codiana:name_help'] = 'Task name help';
+$string['codiana:mainfilename_help'] = 'Task main file name help';
+$string['codiana:difficulty_help'] = 'Difficulty help';
+$string['codiana:grademethod_help'] = 'Grade method help';
+$string['codiana:languages_help'] = 'Languages help';
+$string['codiana:timeopen_help'] = 'Open help';
+$string['codiana:timeclose_help'] = 'Close help';
+$string['codiana:maxusers_help'] = 'Max users help';
+$string['codiana:maxattempts_help'] = 'Max attempts help';
+$string['codiana:limittime_help'] = 'Task time limit';
+$string['codiana:limitmemory_help'] = 'Task memory limit';
+$string['codiana:solutionfile_help'] = 'Solution file help';
+$string['codiana:inputfile_help'] = 'Input file help';
+$string['codiana:outputfile_help'] = 'Output file help';
+$string['codiana:errorfile_help'] = 'Error file help';
+$string['codiana:inputexample_help'] = 'Input help';
+$string['codiana:outputexample_help'] = 'Output help';
 
 
 
@@ -94,4 +94,4 @@ $string['codiana:section:files_help'] = 'Upload either solution or output';
 
 
 // view
-$string['codiana:view:taskmainfilename:warning3'] = 'Submitted solution must contain startup file %s with correct extension (e.g. %s.java, %s.py)';
+$string['codiana:view:mainfilename:warning'] = 'Submitted solution must contain startup file %s with correct extension (e.g. %s.java, %s.py)';

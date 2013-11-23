@@ -168,23 +168,23 @@ class mod_codiana_mod_form extends moodleform_mod {
 
 
     private function addTaskNameElement () {
-        $this->mform->addElement ('text', 'name', get_string ('codiana:taskname', 'codiana'), array ('size' => '64'));
+        $this->mform->addElement ('text', 'name', get_string ('codiana:name', 'codiana'), array ('size' => '64'));
         $this->mform->setType ('name', PARAM_TEXT);
         $this->mform->addRule ('name', null, 'required', null, 'client');
         $this->mform->addRule ('name', null, 'required', null, 'server');
         $this->mform->addRule ('name', get_string ('maximumchars', '', 64), 'maxlength', 64, 'client');
-        $this->mform->addHelpButton ('name', 'codiana:taskname', 'codiana');
+        $this->mform->addHelpButton ('name', 'codiana:name', 'codiana');
     }
 
 
 
     private function addTaskMainFileNameElement () {
-        $this->mform->addElement ('text', 'taskmainfilename', get_string ('codiana:taskmainfilename', 'codiana'), array ('size' => '64'));
-        $this->mform->setType ('taskmainfilename', PARAM_TEXT);
-        $this->mform->addRule ('taskmainfilename', null, 'required', null, 'client');
-        $this->mform->addRule ('taskmainfilename', null, 'required', null, 'server');
-        $this->mform->addRule ('taskmainfilename', get_string ('maximumchars', '', 64), 'maxlength', 64, 'client');
-        $this->mform->addHelpButton ('taskmainfilename', 'codiana:taskmainfilename', 'codiana');
+        $this->mform->addElement ('text', 'mainfilename', get_string ('codiana:mainfilename', 'codiana'), array ('size' => '64'));
+        $this->mform->setType ('mainfilename', PARAM_TEXT);
+        $this->mform->addRule ('mainfilename', null, 'required', null, 'client');
+        $this->mform->addRule ('mainfilename', null, 'required', null, 'server');
+        $this->mform->addRule ('mainfilename', get_string ('maximumchars', '', 64), 'maxlength', 64, 'client');
+        $this->mform->addHelpButton ('mainfilename', 'codiana:mainfilename', 'codiana');
     }
 
 
@@ -197,44 +197,47 @@ class mod_codiana_mod_form extends moodleform_mod {
 
     private function addTaskDifficultyElement () {
         $difficulty = array ('1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5);
-        $this->mform->addElement ('select', 'taskdifficulty', get_string ('codiana:taskdifficulty', 'codiana'), $difficulty);
-        $this->mform->setType ('taskdifficulty', PARAM_INT);
-        $this->mform->getElement ('taskdifficulty')->setSelected ('3');
-        $this->mform->addHelpButton ('taskdifficulty', 'codiana:taskdifficulty', 'codiana');
+        $this->mform->addElement ('select', 'difficulty', get_string ('codiana:difficulty', 'codiana'), $difficulty);
+        $this->mform->setType ('difficulty', PARAM_INT);
+        $this->mform->getElement ('difficulty')->setSelected ('3');
+        $this->mform->addHelpButton ('difficulty', 'codiana:difficulty', 'codiana');
     }
 
 
 
     private function addTaskGradeMethodElement () {
         $gradeMethod = array (
-            '1' => get_string ('codiana:taksgrademethod:strict', 'codiana'),
-            '2' => get_string ('codiana:taksgrademethod:tolerant', 'codiana'),
-            '3' => get_string ('codiana:taksgrademethod:vague', 'codiana')
+            '1' => get_string ('codiana:grademethod:strict', 'codiana'),
+            '2' => get_string ('codiana:grademethod:tolerant', 'codiana'),
+            '3' => get_string ('codiana:grademethod:vague', 'codiana')
         );
-        $this->mform->addElement ('select', 'taskgrademethod', get_string ('codiana:taskgrademethod', 'codiana'), $gradeMethod);
-        $this->mform->getElement ('taskgrademethod')->setSelected ('2');
-        $this->mform->addRule ('taskgrademethod', null, 'required', null, 'client');
-        $this->mform->addRule ('taskgrademethod', null, 'required', null, 'server');
-        $this->mform->setType ('taskgrademethod', PARAM_INT);
-        $this->mform->addHelpButton ('taskgrademethod', 'codiana:taskgrademethod', 'codiana');
+        $this->mform->addElement ('select', 'grademethod', get_string ('codiana:grademethod', 'codiana'), $gradeMethod);
+        $this->mform->getElement ('grademethod')->setSelected ('2');
+        $this->mform->addRule ('grademethod', null, 'required', null, 'client');
+        $this->mform->addRule ('grademethod', null, 'required', null, 'server');
+        $this->mform->setType ('grademethod', PARAM_INT);
+        $this->mform->addHelpButton ('grademethod', 'codiana:grademethod', 'codiana');
     }
 
 
 
     private function addTaskLanguagesElement () {
         global $DB;
-        $result = $DB->get_records ('codiana_language', null, '', 'id,name');
+        $result = $DB->get_records ('codiana_language', null, '', 'extension,name');
         $languages = array ();
         foreach ($result as $language)
-            $languages[$language->id] = $language->name;
+            $languages[$language->extension] = $language->name;
 
-        $this->mform->addElement ('select', 'tasklanguages', get_string ('codiana:tasklanguages', 'codiana'), $languages);
-        $this->mform->getElement ('tasklanguages')->setSelected ('1');
-        $this->mform->getElement ('tasklanguages')->setMultiple (true);
-        $this->mform->addRule ('tasklanguages', null, 'required', null, 'client');
-        $this->mform->addRule ('tasklanguages', null, 'required', null, 'server');
-        $this->mform->setType ('tasklanguages', PARAM_INT);
-        $this->mform->addHelpButton ('tasklanguages', 'codiana:tasklanguages', 'codiana');
+        reset ($languages);
+        $selected = key ($languages);
+
+        $this->mform->addElement ('select', 'languages', get_string ('codiana:languages', 'codiana'), $languages);
+        $this->mform->getElement ('languages')->setSelected ($selected);
+        $this->mform->getElement ('languages')->setMultiple (true);
+        $this->mform->addRule ('languages', null, 'required', null, 'client');
+        $this->mform->addRule ('languages', null, 'required', null, 'server');
+        $this->mform->setType ('languages', PARAM_ALPHANUMEXT);
+        $this->mform->addHelpButton ('languages', 'codiana:languages', 'codiana');
     }
 
 
@@ -247,9 +250,10 @@ class mod_codiana_mod_form extends moodleform_mod {
             'step' => 15,
             'optional' => true
         );
-        //availablefromdate get_string ();!
-        $this->mform->addElement ('date_time_selector', 'tasktimeopen', get_string ('codiana:tasktimeopen', 'codiana'), $options);
-        $this->mform->addHelpButton ('tasktimeopen', 'codiana:tasktimeopen', 'codiana');
+        //TODO availablefromdate get_string ();!
+        $this->mform->addElement ('date_time_selector', 'timeopen', get_string ('codiana:timeopen', 'codiana'), $options);
+        $this->mform->setDefault ('timeopen', time ());
+        $this->mform->addHelpButton ('timeopen', 'codiana:timeopen', 'codiana');
     }
 
 
@@ -262,59 +266,80 @@ class mod_codiana_mod_form extends moodleform_mod {
             'step' => 15,
             'optional' => true
         );
-        $this->mform->addElement ('date_time_selector', 'tasktimeclose', get_string ('codiana:tasktimeclose', 'codiana'), $options);
-        $this->mform->addHelpButton ('tasktimeclose', 'codiana:tasktimeclose', 'codiana');
+        $this->mform->addElement ('date_time_selector', 'timeclose', get_string ('codiana:timeclose', 'codiana'), $options);
+        $this->mform->setDefault ('timeclose', time () + 60 * 60 * 24 * 7);
+        $this->mform->addHelpButton ('timeclose', 'codiana:timeclose', 'codiana');
     }
 
 
 
     private function addTaskMaxUsersElement () {
-        $maxUsersElement =& $this->mform->createElement ('text', 'taskmaxusers', '');
-        $checkboxElement =& $this->mform->createElement ('checkbox', 'taskmaxusers_enabled', '', get_string ('enable'));
+        $maxUsersElement =& $this->mform->createElement ('text', 'maxusers', '');
+        $checkboxElement =& $this->mform->createElement ('checkbox', 'maxusers_enabled', '', get_string ('enable'));
+
+
+        $this->mform->setDefault ('maxusers', 15);
+        $this->mform->setDefault ('maxusers_enabled', 1);
 
         $items = array ($maxUsersElement, $checkboxElement);
-        $this->mform->addGroup ($items, 'taskmaxusers_group', get_string ('codiana:taskmaxusers', 'codiana'), ' ', false);
-        $this->mform->disabledIf ('taskmaxusers_group', 'taskmaxusers_enabled');
-        $this->mform->setType ('taskmaxusers', PARAM_INT);
-        $this->mform->addHelpButton ('taskmaxusers_group', 'codiana:taskmaxusers', 'codiana');
+        $this->mform->addGroup ($items, 'maxusers_group', get_string ('codiana:maxusers', 'codiana'), ' ', false);
+        $this->mform->disabledIf ('maxusers_group', 'maxusers_enabled');
+        $this->mform->setType ('maxusers', PARAM_INT);
+        $this->mform->addHelpButton ('maxusers_group', 'codiana:maxusers', 'codiana');
     }
 
 
 
     private function addTaskMaxAttemptsElement () {
-        $items = array ();
-        $items[] =& $this->mform->createElement ('text', 'taskmaxattempts', '');
-        $items[] =& $this->mform->createElement ('checkbox', 'taskmaxattempts_enabled', '', get_string ('enable'));
-        $this->mform->addGroup ($items, 'taskmaxattempts_group', get_string ('codiana:taskmaxattempts', 'codiana'), ' ', false);
-        $this->mform->disabledIf ('taskmaxattempts_group', 'taskmaxattempts_enabled');
-        $this->mform->setType ('taskmaxattempts', PARAM_INT);
-        $this->mform->addHelpButton ('taskmaxattempts_group', 'codiana:taskmaxattempts', 'codiana');
+        $maxAttemptsElement =& $this->mform->createElement ('text', 'maxattempts', '');
+        $checkboxElement =& $this->mform->createElement ('checkbox', 'maxattempts_enabled', '', get_string ('enable'));
+
+        $this->mform->setDefault ('maxattempts', 10);
+        $this->mform->setDefault ('maxattempts_enabled', 1);
+
+        $items = array ($maxAttemptsElement, $checkboxElement);
+        $this->mform->addGroup ($items, 'maxattempts_group', get_string ('codiana:maxattempts', 'codiana'), ' ', false);
+        $this->mform->disabledIf ('maxattempts_group', 'maxattempts_enabled');
+        $this->mform->setType ('maxattempts', PARAM_INT);
+        $this->mform->addHelpButton ('maxattempts_group', 'codiana:maxattempts', 'codiana');
     }
 
 
 
     private function addTaskLimitTimeElement () {
-        $maxUsersElement =& $this->mform->createElement ('text', 'tasklimittime', '');
-        $checkboxElement =& $this->mform->createElement ('checkbox', 'tasklimittime_enabled', '', get_string ('enable'));
+        $limitTimeFalling =& $this->mform->createElement ('text', 'limittimefalling', '');
+        $limitTimeNothing =& $this->mform->createElement ('text', 'limittimenothing', '');
+        $checkboxElement =& $this->mform->createElement ('checkbox', 'limittime_enabled', '', get_string ('enable'));
 
-        $items = array ($maxUsersElement, $checkboxElement);
-        $this->mform->addGroup ($items, 'tasklimittime_group', get_string ('codiana:tasklimittime', 'codiana'), ' ', false);
-        $this->mform->disabledIf ('tasklimittime_group', 'tasklimittime_enabled');
-        $this->mform->setType ('tasklimittime', PARAM_INT);
-        $this->mform->addHelpButton ('tasklimittime_group', 'codiana:tasklimittime', 'codiana');
+        $this->mform->setDefault ('limittimefalling', 3000);
+        $this->mform->setDefault ('limittimenothing', 6000);
+        $this->mform->setDefault ('limittime_enabled', 1);
+
+        $items = array ($limitTimeFalling, $limitTimeNothing, $checkboxElement);
+        $this->mform->addGroup ($items, 'limittime_group', get_string ('codiana:limittime', 'codiana'), ' ', false);
+        $this->mform->disabledIf ('limittime_group', 'limittime_enabled');
+        $this->mform->setType ('limittimefalling', PARAM_INT);
+        $this->mform->setType ('limittimenothing', PARAM_INT);
+        $this->mform->addHelpButton ('limittime_group', 'codiana:limittime', 'codiana');
     }
 
 
 
     private function addTaskLimitMemoryElement () {
-        $maxUsersElement =& $this->mform->createElement ('text', 'tasklimitmemory', '');
-        $checkboxElement =& $this->mform->createElement ('checkbox', 'tasklimitmemory_enabled', '', get_string ('enable'));
+        $limitMemoryFalling =& $this->mform->createElement ('text', 'limitmemoryfalling', '');
+        $limitMemoryNothing =& $this->mform->createElement ('text', 'limitmemorynothing', '');
+        $checkboxElement =& $this->mform->createElement ('checkbox', 'limitmemory_enabled', '', get_string ('enable'));
 
-        $items = array ($maxUsersElement, $checkboxElement);
-        $this->mform->addGroup ($items, 'tasklimitmemory_group', get_string ('codiana:tasklimitmemory', 'codiana'), ' ', false);
-        $this->mform->disabledIf ('tasklimitmemory_group', 'tasklimitmemory_enabled');
-        $this->mform->setType ('tasklimitmemory', PARAM_INT);
-        $this->mform->addHelpButton ('tasklimitmemory_group', 'codiana:tasklimitmemory', 'codiana');
+        $this->mform->setDefault ('limitmemoryfalling', 100);
+        $this->mform->setDefault ('limitmemorynothing', 200);
+        $this->mform->setDefault ('limitmemory_enabled', 1);
+
+        $items = array ($limitMemoryFalling, $limitMemoryNothing, $checkboxElement);
+        $this->mform->addGroup ($items, 'limitmemory_group', get_string ('codiana:limitmemory', 'codiana'), ' ', false);
+        $this->mform->disabledIf ('limitmemory_group', 'limitmemory_enabled');
+        $this->mform->setType ('limitmemoryfalling', PARAM_INT);
+        $this->mform->setType ('limitmemorynothing', PARAM_INT);
+        $this->mform->addHelpButton ('limitmemory_group', 'codiana:limitmemory', 'codiana');
     }
 
 
@@ -337,25 +362,25 @@ class mod_codiana_mod_form extends moodleform_mod {
 
 
     private function addTaskSolutionFileElement () {
-        $this->addTaskFileElement ('tasksolutionfile', false);
+        $this->addTaskFileElement ('solutionfile', false);
     }
 
 
 
     private function addTaskInputFileElement () {
-        $this->addTaskFileElement ('taskinputfile', false);
+        $this->addTaskFileElement ('inputfile', false);
     }
 
 
 
     private function addTaskOutputFileElement () {
-        $this->addTaskFileElement ('taskoutputfile', false);
+        $this->addTaskFileElement ('outputfile', false);
     }
 
 
 
     private function addTaskErrorFileElement () {
-        $this->addTaskFileElement ('taskerrorfile', false);
+        $this->addTaskFileElement ('errorfile', false);
     }
 
 
@@ -373,67 +398,67 @@ class mod_codiana_mod_form extends moodleform_mod {
             $errors['name'] = 'empty';
 
 
-        $tmp = trim (@$codiana->taskmainfilename);
+        $tmp = trim (@$codiana->mainfilename);
         if (empty($tmp))
-            $errors['taskmainfilename'] = 'empty';
+            $errors['mainfilename'] = 'empty';
         else if (preg_match ('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $tmp) != 1)
-            $errors['taskmainfilename'] = 'regexp';
+            $errors['mainfilename'] = 'regexp';
 
 
-        if (intval (@$codiana->taskgrademethod) == 0)
-            $errors['taskgrademethod'] = 'invalid value';
+        if (intval (@$codiana->grademethod) == 0)
+            $errors['grademethod'] = 'invalid value';
 
 
-        if (!is_array (@$codiana->tasklanguages))
-            $errors['tasklanguages'] = 'not array';
+        if (!is_array (@$codiana->languages))
+            $errors['languages'] = 'not array';
         else {
             global $DB;
             $languages = $DB->get_records ('codiana_language', null, '', 'id');
             $languages = array_keys ($languages);
-            foreach ($codiana->tasklanguages as $language) {
+            foreach ($codiana->languages as $language) {
                 if (in_array ($language, $languages) == false)
-                    $errors['tasklanguages'] = 'Unsupported programming language ' . $language;
+                    $errors['languages'] = 'Unsupported programming language ' . $language;
             }
         }
 
 
-        if (intval (@$codiana->taskdifficulty) == 0)
-            $errors['taskdifficulty'] = 'not number';
+        if (intval (@$codiana->difficulty) == 0)
+            $errors['difficulty'] = 'not number';
 
 
         if (intval (@$codiana->introeditor['format']) == 0)
             $errors['introformat'] = 'not number';
 
-        $timeopen = isset ($codiana->tasktimeopen) && $codiana->tasktimeopen != 0
-            ? intval (@$codiana->tasktimeopen) : null;
-        $timeclose = isset ($codiana->tasktimeclose) && $codiana->tasktimeclose != 0
-            ? intval (@$codiana->tasktimeclose) : null;
+        $timeopen = isset ($codiana->timeopen) && $codiana->timeopen != 0
+            ? intval (@$codiana->timeopen) : null;
+        $timeclose = isset ($codiana->timeclose) && $codiana->timeclose != 0
+            ? intval (@$codiana->timeclose) : null;
         if ((!is_null ($timeopen) && !is_null ($timeclose)) && $timeopen >= $timeclose) {
-            $errors['tasktimeopen'] = 'dates are colliding';
-            $errors['tasktimeclose'] = 'dates are colliding';
+            $errors['timeopen'] = 'dates are colliding';
+            $errors['timeclose'] = 'dates are colliding';
         }
 
 
-        if (!codiana_check_int ($codiana, 'taskmaxusers', false))
-            $errors['taskmaxusers_group'] = 'must be non zero integer';
+        if (!codiana_check_int ($codiana, 'maxusers', false))
+            $errors['maxusers_group'] = 'must be non zero integer';
 
 
-        if (!codiana_check_int ($codiana, 'taskmaxattempts', false))
-            $errors['taskmaxattempts_group'] = 'must be non zero integer';
+        if (!codiana_check_int ($codiana, 'maxattempts', false))
+            $errors['maxattempts_group'] = 'must be non zero integer';
 
 
-        if (!codiana_check_int ($codiana, 'tasklimittime', false))
-            $errors['tasklimittime_group'] = 'must be non zero integer';
+        if (!codiana_check_int ($codiana, 'limittime', false))
+            $errors['limittime_group'] = 'must be non zero integer';
 
 
-        if (!codiana_check_int ($codiana, 'tasklimitmemory', false))
-            $errors['tasklimitmemory_group'] = 'must be non zero integer';
+        if (!codiana_check_int ($codiana, 'limitmemory', false))
+            $errors['limitmemory_group'] = 'must be non zero integer';
 
 
-        $codiana->tasksolutionfile = @$codiana->tasksolutionfile;
-        $codiana->taskinputfile = @$codiana->taskinputfile;
-        $codiana->taskoutputfile = @$codiana->taskoutputfile;
-        $codiana->taskerrorfile = @$codiana->taskerrorfile;
+        $codiana->solutionfile = @$codiana->solutionfile;
+        $codiana->inputfile = @$codiana->inputfile;
+        $codiana->outputfile = @$codiana->outputfile;
+        $codiana->errorfile = @$codiana->errorfile;
 
         $codiana->visible = @$codiana->visible;
         $codiana->cmidnumber = @$codiana->cmidnumber;
@@ -450,13 +475,11 @@ class mod_codiana_mod_form extends moodleform_mod {
      */
     public function data_preprocessing (&$toform) {
         parent::data_preprocessing ($toform);
-//        echo '<pre>';
-//        print_r ($toform);
-//        die ();
 
-        if (isset ($toform['tasklanguages'])) {
+        if (isset ($toform['languages'])) {
             $index = 0;
-            $value = intval ($toform['tasklanguages']);
+            //TODO secure language values
+            $value = trim ($toform['languages']);
             $number = 0;
             $values = array ();
             while ($number < $value) {
@@ -464,12 +487,12 @@ class mod_codiana_mod_form extends moodleform_mod {
                 if (($value & $number) > 0)
                     $values[] = $number;
             }
-            $toform['tasklanguages'] = $values;
+            $toform['languages'] = $values;
         }
 
         $checkFields = array (
-            'taskmaxusers', 'taskmaxattempts', 'tasklimittime', 'tasklimitmemory',
-            'tasktimeopen', 'tasktimeclose');
+            'maxusers', 'maxattempts', 'limittime', 'limitmemory',
+            'timeopen', 'timeclose');
 
         foreach ($checkFields as $field)
             if (isset ($toform[$field]))
@@ -479,16 +502,16 @@ class mod_codiana_mod_form extends moodleform_mod {
 
 
     private function addTaskInputExample () {
-        $this->mform->addElement ('textarea', 'taskinputexample', get_string ('codiana:taskinputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
-        $this->mform->setType ('taskinputexample', PARAM_TEXT);
-        $this->mform->addHelpButton ('taskinputexample', 'codiana:taskinputexample', 'codiana');
+        $this->mform->addElement ('textarea', 'inputexample', get_string ('codiana:inputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
+        $this->mform->setType ('inputexample', PARAM_TEXT);
+        $this->mform->addHelpButton ('inputexample', 'codiana:inputexample', 'codiana');
     }
 
 
 
     private function addTaskOutputExample () {
-        $this->mform->addElement ('textarea', 'taskoutputexample', get_string ('codiana:taskoutputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
-        $this->mform->setType ('taskoutputexample', PARAM_TEXT);
-        $this->mform->addHelpButton ('taskoutputexample', 'codiana:taskoutputexample', 'codiana');
+        $this->mform->addElement ('textarea', 'outputexample', get_string ('codiana:outputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
+        $this->mform->setType ('outputexample', PARAM_TEXT);
+        $this->mform->addHelpButton ('outputexample', 'codiana:outputexample', 'codiana');
     }
 }

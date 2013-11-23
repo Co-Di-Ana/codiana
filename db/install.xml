@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/codiana/db" VERSION="20131115" COMMENT="XMLDB file for Moodle mod/codiana"
+<XMLDB PATH="mod/codiana/db" VERSION="20131123" COMMENT="XMLDB file for Moodle mod/codiana"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -9,22 +9,24 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course codiana activity belongs to"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Task name for codiana instance"/>
-        <FIELD NAME="taskmainfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the main class file. Startup class name."/>
-        <FIELD NAME="taskdifficulty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="3" SEQUENCE="false" COMMENT="Difficulty of the task. 1 is easy 5 is hard."/>
-        <FIELD NAME="taskgrademethod" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Grade method of the task. strick is 0. tolerant is 1. vague is 2"/>
-        <FIELD NAME="tasklanguages" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Allowed languages for this task, binary coding."/>
+        <FIELD NAME="mainfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the main class file. Startup class name."/>
+        <FIELD NAME="difficulty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="3" SEQUENCE="false" COMMENT="Difficulty of the task. 1 is easy 5 is hard."/>
+        <FIELD NAME="grademethod" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Grade method of the task. strick is 0. tolerant is 1. vague is 2"/>
+        <FIELD NAME="languages" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Allowed languages for this task, binary coding."/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="General introduction of the codiana activity"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="tasktimeopen" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="From when is task open."/>
-        <FIELD NAME="tasktimeclose" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When is task closed"/>
-        <FIELD NAME="taskmaxusers" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum user allowed for this task."/>
-        <FIELD NAME="taskmaxattempts" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum attempts allowed for this task."/>
-        <FIELD NAME="tasklimittime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time limit for this task in ms."/>
-        <FIELD NAME="tasklimitmemory" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Memory limit for this task in bytes"/>
-        <FIELD NAME="taskinputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Input example"/>
-        <FIELD NAME="taskoutputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Output example"/>
+        <FIELD NAME="timeopen" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="From when is task open."/>
+        <FIELD NAME="timeclose" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When is task closed"/>
+        <FIELD NAME="maxusers" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum user allowed for this task."/>
+        <FIELD NAME="maxattempts" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="Maximum attempts allowed for this task."/>
+        <FIELD NAME="limittimefalling" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The time threshold in ms where overstepping couses point loss, 100 - 0 points awarded"/>
+        <FIELD NAME="limittimenothing" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The time threshold in ms after which is classification zero, zero points awarded"/>
+        <FIELD NAME="limitmemoryfalling" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The value threshold in kB where overstepping couses point loss, 100 - 0 points awarded"/>
+        <FIELD NAME="limitmemorynothing" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The value threshold in kB after which is classification zero, zero points awarded"/>
+        <FIELD NAME="inputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Input example"/>
+        <FIELD NAME="outputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Output example"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -41,6 +43,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="extension" TYPE="unique" FIELDS="extension" COMMENT="Extensions are unique"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="codiana_attempt" COMMENT="Table of every user attempts">
@@ -48,21 +51,37 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK of user id"/>
-        <FIELD NAME="attemptsent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="From when is task open."/>
-        <FIELD NAME="attemptstate" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="State of the attempt, error, ok, wrong, output etc."/>
-        <FIELD NAME="attemptlanguage" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK of the language id"/>
-        <FIELD NAME="attemptruntime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time is ms of the program run time"/>
-        <FIELD NAME="attemptrunoutput" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of correct lines"/>
-        <FIELD NAME="attemptresulttime" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Percentage value program run time"/>
-        <FIELD NAME="attemptresultoutput" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Percentage value of program correct lines"/>
-        <FIELD NAME="attemptresultfinal" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Final result"/>
-        <FIELD NAME="attemptresultnote" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Optional note to the result, may contain error description"/>
+        <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="From when is task open."/>
+        <FIELD NAME="state" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="State of the attempt, error, ok, wrong, output etc."/>
+        <FIELD NAME="language" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK of the language id"/>
+        <FIELD NAME="detail" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Additional details for server-side application (1 is zipped)"/>
+        <FIELD NAME="runtime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time is ms of the program run time"/>
+        <FIELD NAME="runoutput" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of correct lines"/>
+        <FIELD NAME="runmemory" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Max memory peak in kB"/>
+        <FIELD NAME="resulttime" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Percentage value program run time"/>
+        <FIELD NAME="resultoutput" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Percentage value of program correct lines"/>
+        <FIELD NAME="resultmemory" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Percentage value of program memory stress"/>
+        <FIELD NAME="resultfinal" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Final result"/>
+        <FIELD NAME="resultnote" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Optional note to the result, may contain error description"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="codiana" REFFIELDS="id" COMMENT="FK of codiana id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="FK of user id"/>
-        <KEY NAME="attemptlanguage" TYPE="foreign" FIELDS="attemptlanguage" REFTABLE="codiana_language" REFFIELDS="id" COMMENT="FK of the language id"/>
+        <KEY NAME="language" TYPE="foreign" FIELDS="language" REFTABLE="codiana_language" REFFIELDS="id" COMMENT="FK of the language id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="codiana_queue" COMMENT="Request queue to be processed by server-side application">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Codiana instance (task) unique id"/>
+        <FIELD NAME="relatedid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Either id of an student/teacher when solution check or teacher/managers id when plagiarism check request"/>
+        <FIELD NAME="type" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Type of a request - solution (0) or plagiarism (1)"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="codiana" REFFIELDS="id" COMMENT="FK of codiana instance"/>
+        <KEY NAME="relatedid" TYPE="foreign" FIELDS="relatedid" REFTABLE="user" REFFIELDS="id" COMMENT="FK of user id"/>
       </KEYS>
     </TABLE>
   </TABLES>

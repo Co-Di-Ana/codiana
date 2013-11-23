@@ -102,14 +102,14 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
         $output .= $this->view_block (
             $this->view_code (
-                get_string ('codiana:taskinputexample', 'codiana'),
-                $this->codiana->taskinputexample));
+                get_string ('codiana:inputexample', 'codiana'),
+                $this->codiana->inputexample));
         $output .= $this->view_block (
             $this->view_code (
-                get_string ('codiana:taskoutputexample', 'codiana'),
-                $this->codiana->taskoutputexample));
+                get_string ('codiana:outputexample', 'codiana'),
+                $this->codiana->outputexample));
 
-        $output .= $this->view_taskmainfile_warning ();
+        $output .= $this->view_mainfile_warning ();
         return $output;
     }
 
@@ -169,12 +169,12 @@ class mod_codiana_renderer extends plugin_renderer_base {
     /**
      * @return string
      */
-    private function view_taskmainfile_warning () {
+    private function view_mainfile_warning () {
         $output = '';
         $output .= sprintf (
-            get_string ("codiana:view:taskmainfilename:warning3", "codiana"),
-            html_writer::tag ("span", $this->codiana->taskmainfilename, array ('class' => 'codiana_taskmainfilename_warning')),
-            $this->codiana->taskmainfilename, $this->codiana->taskmainfilename
+            get_string ("codiana:view:mainfilename:warning", "codiana"),
+            html_writer::tag ("span", $this->codiana->mainfilename, array ('class' => 'codiana_mainfilename_warning')),
+            $this->codiana->mainfilename, $this->codiana->mainfilename
         );
         return $this->view_block ($output, 'generalbox');
     }
@@ -206,16 +206,16 @@ class Codiana extends stdClass {
     public $name;
 
     /** @var string */
-    public $taskmainfilename;
+    public $mainfilename;
 
     /** @var int */
-    public $taskdifficulty;
+    public $difficulty;
 
     /** @var int */
-    public $taskgrademethod;
+    public $grademethod;
 
     /** @var array */
-    public $tasklanguages;
+    public $languages;
 
     /** @var string */
     public $intro;
@@ -230,34 +230,34 @@ class Codiana extends stdClass {
     public $timemodified;
 
     /** @var int */
-    public $tasktimeopen;
+    public $timeopen;
 
     /** @var int */
-    public $tasktimeclose;
+    public $timeclose;
 
     /** @var int */
-    public $taskmaxusers;
+    public $maxusers;
 
     /** @var int */
-    public $taskmaxattempts;
+    public $maxattempts;
 
     /** @var int */
-    public $tasklimittime;
+    public $limittime;
 
     /** @var int */
-    public $tasklimitmemory;
+    public $limitmemory;
 
     /** @var string */
-    public $taskinputexample;
+    public $inputexample;
 
     /** @var string */
-    public $taskoutputexample;
+    public $outputexample;
 
     /** @var array */
-    private $props = array ('id', 'course', 'name', 'taskmainfilename', 'taskdifficulty', 'taskgrademethod',
-                            'tasklanguages', 'intro', 'introformat', 'timecreated', 'timemodified',
-                            'tasktimeopen', 'tasktimeclose', 'taskmaxusers', 'taskmaxattempts',
-                            'tasklimittime', 'tasklimitmemory', 'taskinputexample', 'taskoutputexample');
+    private $props = array ('id', 'course', 'name', 'mainfilename', 'difficulty', 'grademethod',
+                            'languages', 'intro', 'introformat', 'timecreated', 'timemodified',
+                            'timeopen', 'timeclose', 'maxusers', 'maxattempts',
+                            'limittime', 'limitmemory', 'inputexample', 'outputexample');
 
 
 

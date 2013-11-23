@@ -119,31 +119,31 @@ function codiana_preprocess (stdClass $codiana) {
     require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 
     $codiana->name = codiana_parse_string (@$codiana->name);
-    $codiana->taskmainfilename = codiana_parse_string (@$codiana->taskmainfilename);
-    $codiana->taskgrademethod = codiana_parse_int (@$codiana->taskgrademethod, 0);
-    $codiana->tasklanguages = array_sum (@$codiana->tasklanguages);
-    $codiana->taskdifficulty = codiana_parse_int (@$codiana->taskdifficulty, 0);
+    $codiana->mainfilename = codiana_parse_string (@$codiana->mainfilename);
+    $codiana->grademethod = codiana_parse_int (@$codiana->grademethod, 0);
+    $codiana->languages = array_sum (@$codiana->languages);
+    $codiana->difficulty = codiana_parse_int (@$codiana->difficulty, 0);
     $codiana->intro = codiana_parse_string (@$codiana->intro, "");
     $codiana->introformat = codiana_parse_int (@$codiana->introformat, 0);
 
 
-    $codiana->tasktimeopen = codiana_parse_int (@$codiana->tasktimeopen, null);
-    $codiana->tasktimeclose = codiana_parse_int (@$codiana->tasktimeclose, null);
+    $codiana->timeopen = codiana_parse_int (@$codiana->timeopen, null);
+    $codiana->timeclose = codiana_parse_int (@$codiana->timeclose, null);
 
 
-    $codiana->taskmaxusers = codiana_parse_int (@$codiana->taskmaxusers);
-    $codiana->taskmaxattempts = codiana_parse_int (@$codiana->taskmaxattempts);
-    $codiana->tasklimittime = codiana_parse_int (@$codiana->tasklimittime);
-    $codiana->tasklimitmemory = codiana_parse_int (@$codiana->tasklimitmemory);
+    $codiana->maxusers = codiana_parse_int (@$codiana->maxusers);
+    $codiana->maxattempts = codiana_parse_int (@$codiana->maxattempts);
+    $codiana->limittime = codiana_parse_int (@$codiana->limittime);
+    $codiana->limitmemory = codiana_parse_int (@$codiana->limitmemory);
 
 
-    $codiana->tasksolutionfile = @$codiana->tasksolutionfile;
-    $codiana->taskinputfile = @$codiana->taskinputfile;
-    $codiana->taskoutputfile = @$codiana->taskoutputfile;
-    $codiana->taskerrorfile = @$codiana->taskerrorfile;
+    $codiana->solutionfile = @$codiana->solutionfile;
+    $codiana->inputfile = @$codiana->inputfile;
+    $codiana->outputfile = @$codiana->outputfile;
+    $codiana->errorfile = @$codiana->errorfile;
 
-    $codiana->taskinputexample = codiana_parse_string (@$codiana->taskinputexample);
-    $codiana->taskoutputexample = codiana_parse_string (@$codiana->taskoutputexample);
+    $codiana->inputexample = codiana_parse_string (@$codiana->inputexample);
+    $codiana->outputexample = codiana_parse_string (@$codiana->outputexample);
 
     $codiana->visible = @$codiana->visible;
     $codiana->cmidnumber = @$codiana->cmidnumber;
