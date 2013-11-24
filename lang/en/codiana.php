@@ -61,6 +61,9 @@ $string['codiana:errorfile'] = 'Error file';
 $string['codiana:inputexample'] = 'Input example';
 $string['codiana:outputexample'] = 'Output example';
 
+$string['codiana:sourcefile'] = 'Solution';
+$string['codiana:solutionlanguage'] = 'Solution language';
+
 // edit form help
 $string['codiana:name_help'] = 'Task name help';
 $string['codiana:mainfilename_help'] = 'Task main file name help';
@@ -79,6 +82,10 @@ $string['codiana:outputfile_help'] = 'Output file help';
 $string['codiana:errorfile_help'] = 'Error file help';
 $string['codiana:inputexample_help'] = 'Input help';
 $string['codiana:outputexample_help'] = 'Output help';
+
+
+$string['codiana:sourcefile_help'] = 'Solution help';
+$string['codiana:solutionlanguage_help'] = 'Specify solution language';
 
 
 

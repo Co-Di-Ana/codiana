@@ -477,17 +477,9 @@ class mod_codiana_mod_form extends moodleform_mod {
         parent::data_preprocessing ($toform);
 
         if (isset ($toform['languages'])) {
-            $index = 0;
             //TODO secure language values
             $value = trim ($toform['languages']);
-            $number = 0;
-            $values = array ();
-            while ($number < $value) {
-                $number = pow (2, $index++);
-                if (($value & $number) > 0)
-                    $values[] = $number;
-            }
-            $toform['languages'] = $values;
+            $toform['languages'] = explode(',', $value);
         }
 
         $checkFields = array (

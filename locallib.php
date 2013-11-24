@@ -76,3 +76,18 @@ function codiana_parse_timestamp ($value, $default = null) {
     $value = empty($value) ? $default : intval ($value);
     return $value;
 }
+
+function codiana_solution_submit () {
+//    global $USER;
+//    echo '<pre>';
+//    print_r ($USER);
+//    die ();
+}
+
+
+function codiana_solution_get_extension($mform, $name) {
+    $filename = $mform->get_new_filename ($name);
+    $extension = pathinfo ($filename, PATHINFO_EXTENSION);
+
+    return $extension;
+}

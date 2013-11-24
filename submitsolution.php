@@ -67,6 +67,7 @@ global $OUTPUT;
 
 
 $mform = new mod_codiana_submitsolution_form ($url);
+$mform->validate_solution_file ();
 
 // Form processing and displaying
 if ($mform->is_cancelled ()) {
@@ -76,9 +77,6 @@ if ($mform->is_cancelled ()) {
 } else if ($data = $mform->get_data ()) {
     // form is valid
 
-    //# -----  ----------------------------------------------------------------
-    // SAVE UPLOADED FILE BUT WHERE TO???
-    //# -----  ----------------------------------------------------------------
 
 
 //    $content = $mform->get_file_content('sourcefile');
@@ -87,10 +85,10 @@ if ($mform->is_cancelled ()) {
 //    echo $success ? 'uploaded' : 'error';
 //    $storedfile = $mform->save_stored_file('userfile', ...);
 
-
-    // write to DB that there is new solution
-    // code
-
+    echo $OUTPUT->header ();
+    $mform->display ($codiana, $cm, $course);
+    echo $OUTPUT->footer ();
+    die ();
     // redirect user to view
     redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), "uploaded", 3 * 1000);
 

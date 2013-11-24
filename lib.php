@@ -121,7 +121,7 @@ function codiana_preprocess (stdClass $codiana) {
     $codiana->name = codiana_parse_string (@$codiana->name);
     $codiana->mainfilename = codiana_parse_string (@$codiana->mainfilename);
     $codiana->grademethod = codiana_parse_int (@$codiana->grademethod, 0);
-    $codiana->languages = array_sum (@$codiana->languages);
+    $codiana->languages = implode (',', @$codiana->languages);
     $codiana->difficulty = codiana_parse_int (@$codiana->difficulty, 0);
     $codiana->intro = codiana_parse_string (@$codiana->intro, "");
     $codiana->introformat = codiana_parse_int (@$codiana->introformat, 0);

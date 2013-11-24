@@ -37,32 +37,70 @@ require_once ($CFG->libdir . '/formslib.php');
 class mod_codiana_submitsolution_form extends moodleform {
 
 
+    public $extension;
+
     protected function definition () {
-        global $CFG;
+        global $CFG, $DB;
         $mform = $this->_form;
 
-//        $mform->addElement('text', 'name', get_string('codiananame', 'codiana'), array('size'=>'64'));
-//        $mform->setType('name', PARAM_TEXT);
-//
-//        $mform->addElement('header', 'codianafieldset', get_string('codianafieldset', 'codiana'));
-//
-//        $mform->addElement('text', 'label2', 'codianasetting2', 'Your codiana fields go here. Replace me!');
-//        $mform->setType('label2', PARAM_EMAIL);
-//        $mform->addRule('label2', 'email je povinný', 'required');
-//
-//        $mform->addElement('filepicker', 'label3', 'codianasetting3', null, array('maxbytes' => 1, 'accepted_types' => '*'));
-//        $mform->setType('label3', PARAM_FILE);
 
-        $mform->addElement (
-            'filepicker',
-            'sourcefile',
-            get_string ('file'),
-            null,
-            array ('maxbytes' => $CFG->maxbytes,
-                   'accepted_types' => '*'));
+        $result = $DB->get_records ('codiana_language', null, '', 'extension,name');
+        $languages = array ();
+        $filter = '*.zip';
+        foreach ($result as $language) {
+            $languages[$language->extension] = $language->name;
+            $filter .= ',*.' . $language->extension;
+        }
+        reset ($languages);
+        $selected = key ($languages);
+
+
+        // solution extension if zip
+        $mform->addElement ('select', 'language', get_string ('codiana:solutionlanguage', 'codiana'), $languages);
+        $mform->getElement ('language')->setSelected ($selected);
+        $mform->getElement ('language')->setMultiple (false);
+        $mform->addRule ('language', null, 'required', null, 'client');
+        $mform->addRule ('language', null, 'required', null, 'server');
+        $mform->setType ('language', PARAM_ALPHANUMEXT);
+        $mform->addHelpButton ('language', 'codiana:solutionlanguage', 'codiana');
+
+        // solution file
+        $mform->addElement ('filepicker', 'sourcefile', get_string ('codiana:sourcefile', 'codiana'), null,
+            array (
+                'maxbytes' => $CFG->maxbytes,
+                'accepted_types' => $filter
+            )
+        );
         $mform->setType ('sourcefile', PARAM_RAW);
-        $mform->addRule ('sourcefile', "you must specify atleast one file", "required", null, 'client');
+        $mform->addRule ('sourcefile', 'you must specify atleast one file', 'required', null, 'client');
+        $mform->addHelpButton ('sourcefile', 'codiana:sourcefile', 'codiana');
 
         $this->add_action_buttons (true, get_string ('codiana:submitsolution:submit', 'codiana'));
+    }
+
+
+    // Perform some extra moodle validation
+//    function validation($data, $files) {
+//        echo "-validation-<br />";
+//        $errors = parent::validation($data, $files);
+//        $this->validate_solution_file($errors);
+//        return $errors;
+//    }
+
+    public function validate_solution_file () {
+        global $CFG, $DB;
+        require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
+        $solution = (object)$this->get_data ();
+        $extension = codiana_solution_get_extension ($this, 'sourcefile');
+        $extension = $extension == 'zip' ? $solution->language : $extension;
+        $this->extension = $extension;
+
+        $languages = $DB->get_records ('codiana_language', null, '', 'extension');
+        $languages = array_keys ($languages);
+
+        // unknown extension check
+        if (in_array($extension, $languages) == false || true) {
+            $this->_errors['sourcefile'] = 'Unknown extension';
+        }
     }
 }
