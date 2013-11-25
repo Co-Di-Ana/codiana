@@ -102,3 +102,22 @@ $string['codiana:section:files_help'] = 'Upload either solution or output';
 
 // view
 $string['codiana:view:mainfilename:warning'] = 'Submitted solution must contain startup file %s with correct extension (e.g. %s.java, %s.py)';
+
+
+// settings
+$string['codiana:setting:storage'] = 'Storage';
+$string['codiana:setting:limittime'] = 'Maximum execution time';
+$string['codiana:setting:limitmemory'] = 'Maximum memory peak';
+$string['codiana:setting:islocal'] = 'Local storage';
+$string['codiana:setting:storagepath'] = 'Data path';
+$string['codiana:setting:sshusername'] = 'Username (SSH)';
+$string['codiana:setting:sshpassword'] = 'Password (SSH)';
+
+
+$string['codiana:setting:storage_desc'] = 'Storage setting';
+$string['codiana:setting:limittime_desc'] = 'Maximum allowed execution time in seconds';
+$string['codiana:setting:limitmemory_desc'] = 'Maximum memory peak value in MB';
+$string['codiana:setting:islocal_desc'] = 'Specify whether is storage local, if so, checked this option';
+$string['codiana:setting:storagepath_desc'] = 'Specify where will be codiana data stored';
+$string['codiana:setting:sshusername_desc'] = 'If storage is remote, specify username for ssh conenction, otherwise leave it blank';
+$string['codiana:setting:sshpassword_desc'] = 'If storage is remote, specify password for ssh conenction, otherwise leave it blank';

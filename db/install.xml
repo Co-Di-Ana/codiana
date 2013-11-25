@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/codiana/db" VERSION="20131124" COMMENT="XMLDB file for Moodle mod/codiana"
+<XMLDB PATH="mod/codiana/db" VERSION="20131125" COMMENT="XMLDB file for Moodle mod/codiana"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -52,7 +52,7 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK of user id"/>
         <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="From when is task open."/>
         <FIELD NAME="state" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="State of the attempt, error, ok, wrong, output etc."/>
-        <FIELD NAME="language" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="FK of the language id"/>
+        <FIELD NAME="language" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="language extension"/>
         <FIELD NAME="detail" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Additional details for server-side application (1 is zipped)"/>
         <FIELD NAME="runtime" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Time is ms of the program run time"/>
         <FIELD NAME="runoutput" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Number of correct lines"/>
@@ -67,20 +67,21 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="codiana" REFFIELDS="id" COMMENT="FK of codiana id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="FK of user id"/>
-        <KEY NAME="language" TYPE="foreign" FIELDS="language" REFTABLE="codiana_language" REFFIELDS="id" COMMENT="FK of the language id"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="codiana_queue" COMMENT="Request queue to be processed by server-side application">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Codiana instance (task) unique id"/>
-        <FIELD NAME="relatedid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Either id of an student/teacher when solution check or teacher/managers id when plagiarism check request"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of a user who made this request"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="id of a users attempt if type of request is solution check, otherwise null value"/>
         <FIELD NAME="type" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Type of a request - solution (0) or plagiarism (1)"/>
+        <FIELD NAME="priority" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Request priority"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="codiana" REFFIELDS="id" COMMENT="FK of codiana instance"/>
-        <KEY NAME="relatedid" TYPE="foreign" FIELDS="relatedid" REFTABLE="user" REFFIELDS="id" COMMENT="FK of user id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="user FK"/>
       </KEYS>
     </TABLE>
   </TABLES>

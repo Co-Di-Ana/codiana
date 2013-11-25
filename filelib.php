@@ -18,6 +18,10 @@ interface IFileTransfer {
 
 
 
+    public function mkDir ($location);
+
+
+
     public function zipDir ($dirLocation, $zipLocation);
 
 
@@ -149,6 +153,12 @@ class RemoteFileTransfer implements IFileTransfer {
 
 
 
+    public function mkDir ($location) {
+        // TODO Implement mkDir () method
+    }
+
+
+
     public function zipDir ($dirLocation, $zipLocation) {
         // TODO: Implement zipDir() method.
     }
@@ -156,6 +166,9 @@ class RemoteFileTransfer implements IFileTransfer {
 
 
     public function setConfig ($object) {
+        if (!is_object ($object))
+            $object = (object)$object;
+
         foreach ($object as $key => $value)
             $this->config->$key = $value;
     }
@@ -192,6 +205,12 @@ class LocalFileTransfer implements IFileTransfer {
                 (is_dir ("$path/$file")) ? $this->deleteDir ("$path/$file") : unlink ("$path/$file");
             return rmdir ($path);
         }
+    }
+
+
+
+    public function mkDir ($location) {
+        return @mkdir ($location, 0777, true);
     }
 
 

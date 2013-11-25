@@ -37,13 +37,20 @@ require_once ($CFG->libdir . '/formslib.php');
 class mod_codiana_submitsolution_form extends moodleform {
 
 
+    /** @var string  */
     public $extension;
+
+    /** @var string  */
+    public $defaultExtension;
+
+
 
     protected function definition () {
         global $CFG, $DB;
         $mform = $this->_form;
 
 
+        // TODO only allowed extension
         $result = $DB->get_records ('codiana_language', null, '', 'extension,name');
         $languages = array ();
         $filter = '*.zip';
@@ -66,17 +73,19 @@ class mod_codiana_submitsolution_form extends moodleform {
 
         // solution file
         $mform->addElement ('filepicker', 'sourcefile', get_string ('codiana:sourcefile', 'codiana'), null,
-            array (
-                'maxbytes' => $CFG->maxbytes,
-                'accepted_types' => $filter
-            )
+                            array (
+                                  'maxbytes' => $CFG->maxbytes,
+                                  'accepted_types' => $filter
+                            )
         );
         $mform->setType ('sourcefile', PARAM_RAW);
         $mform->addRule ('sourcefile', 'you must specify atleast one file', 'required', null, 'client');
+        $mform->addRule ('sourcefile', 'you must specify atleast one file', 'required', null, 'server');
         $mform->addHelpButton ('sourcefile', 'codiana:sourcefile', 'codiana');
 
         $this->add_action_buttons (true, get_string ('codiana:submitsolution:submit', 'codiana'));
     }
+
 
 
     // Perform some extra moodle validation
@@ -87,20 +96,20 @@ class mod_codiana_submitsolution_form extends moodleform {
 //        return $errors;
 //    }
 
-    public function validate_solution_file () {
-        global $CFG, $DB;
+    public function validate_solution_file ($codiana) {
+        global $CFG;
         require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
         $solution = (object)$this->get_data ();
-        $extension = codiana_solution_get_extension ($this, 'sourcefile');
-        $extension = $extension == 'zip' ? $solution->language : $extension;
-        $this->extension = $extension;
+        $this->defaultExtension = codiana_solution_get_extension ($this, 'sourcefile');
+        $this->extension = $this->defaultExtension == 'zip' ? $solution->language : $this->defaultExtension;
 
-        $languages = $DB->get_records ('codiana_language', null, '', 'extension');
-        $languages = array_keys ($languages);
+        $languages = trim ($codiana->languages);
+        $languages = empty($languages) ? array () : explode (',', $codiana->languages);
 
         // unknown extension check
-        if (in_array($extension, $languages) == false || true) {
-            $this->_errors['sourcefile'] = 'Unknown extension';
+        if (in_array ($this->extension, $languages) == false) {
+            return 'Unapproved file type \'%s\'';
         }
+        return null;
     }
 }

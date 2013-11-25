@@ -85,9 +85,31 @@ function codiana_solution_submit () {
 }
 
 
-function codiana_solution_get_extension($mform, $name) {
+function codiana_solution_get_extension ($mform, $name) {
     $filename = $mform->get_new_filename ($name);
     $extension = pathinfo ($filename, PATHINFO_EXTENSION);
 
     return $extension;
+}
+
+
+/**
+ * @return IFileTransfer
+ */
+function codiana_get_file_transfer () {
+    global $CFG;
+    require_once ($CFG->dirroot . '/mod/codiana/filelib.php');
+
+    $isLocal = get_config ('codiana', 'islocal');
+    if ($isLocal)
+        return new LocalFileTransfer();
+
+    $remote = new RemoteFileTransfer();
+    $remote->setConfig (
+        array (
+              'username' => get_config ('codiana', 'sshusername'),
+              'password' => get_config ('codiana', 'sshpassword'),
+        )
+    );
+    return new RemoteFileTransfer();
 }

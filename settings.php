@@ -30,47 +30,69 @@ require_once ($CFG->dirroot . '/mod/codiana/lib.php');
 
 $settings->add (
     new admin_setting_configtext(
-        'codiana/maxexectime',
-        'Maximum execution time',
-        'Maximum allowed execution time in seconds',
+        'codiana/limittime',
+        get_string ('codiana:setting:limittime', 'codiana'),
+        get_string ('codiana:setting:limittime_desc', 'codiana'),
         60, PARAM_INT, 4
     )
 );
 
-$settings->add (new admin_setting_heading('name', 'heading', null));
-//
-//$settings->add (new admin_setting_configmulticheckbox(
-//                    'condiana_languages3',
-//                    'Languages',
-//                    'Installed languages',
-//                    array (1, 2),
-//                    array ('none', 'java', 'c', 'c++', 'python')
-//                )
-//);
-//
-//$settings->add (new admin_setting_configmulticheckbox2(
-//                    'condiana/languages3',
-//                    'Languages',
-//                    'Installed languages',
-//                    array (1, 2),
-//                    array ('none', 'java', 'c', 'c++', 'python')
-//                )
-//);
-//
-//$settings->add (new admin_setting_configtext_with_advanced(
-//                    'codiana/languages',
-//                    'Languages',
-//                    'Installed languages',
-//                    array ('value' => '0', 'adv' => false),
-//                    PARAM_TEXT)
-//);
-//
-//
-//$settings->add (new admin_setting_configselect_with_advanced(
-//                    'codiana/languages2',
-//                    'Languages',
-//                    'Installed languages',
-//                    array ('value' => -1, 'adv' => true),
-//                    array (-1 => 'none', 'java', 'c', 'c++', 'python')
-//                )
-//);
+
+$settings->add (
+    new admin_setting_configtext(
+        'codiana/limitmemory',
+        get_string ('codiana:setting:limitmemory', 'codiana'),
+        get_string ('codiana:setting:limitmemory_desc', 'codiana'),
+        100, PARAM_INT, 4
+    )
+);
+
+
+
+
+$settings->add (
+    new admin_setting_heading(
+        'name',
+        get_string ('codiana:setting:storage', 'codiana'),
+        get_string ('codiana:setting:storage_desc', 'codiana')
+    )
+);
+
+$settings->add (
+    new admin_setting_configcheckbox(
+        'codiana/islocal',
+        get_string ('codiana:setting:islocal', 'codiana'),
+        get_string ('codiana:setting:islocal', 'codiana'),
+        1
+    )
+);
+
+// TODO normalise path
+$settings->add (
+    new admin_setting_configtext(
+        'codiana/storagepath',
+        get_string ('codiana:setting:storagepath', 'codiana'),
+        get_string ('codiana:setting:storagepath_desc', 'codiana'),
+        '/var/codiana/data', PARAM_TEXT, 100
+    )
+);
+
+
+$settings->add (
+    new admin_setting_configtext(
+        'codiana/sshusername',
+        get_string ('codiana:setting:sshusername', 'codiana'),
+        get_string ('codiana:setting:sshusername_desc', 'codiana'),
+        '', PARAM_ALPHANUMEXT, 30
+    )
+);
+
+
+$settings->add (
+    new admin_setting_configpasswordunmask (
+        'codiana/sshpassword',
+        get_string ('codiana:setting:sshpassword', 'codiana'),
+        get_string ('codiana:setting:sshpassword_desc', 'codiana'),
+        ''
+    )
+);

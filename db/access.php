@@ -82,7 +82,7 @@ $capabilities = array (
     ),
 
 
-    //# ----- capability to submit ones solution ---------------------------------------------------
+    //# ----- capability to view ones results ------------------------------------------------------
     'mod/codiana:viewresults' => array (
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -117,6 +117,16 @@ $capabilities = array (
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array (
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+    //# ----- capability to have higher priority ---------------------------------------------------
+    'mod/codiana:queueimportance' => array (
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'legacy' => array (
+            'student' => CAP_PREVENT,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         )

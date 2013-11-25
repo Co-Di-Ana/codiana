@@ -476,7 +476,7 @@ function codiana_extend_settings_navigation (settings_navigation $settingsnav, n
         $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $PAGE->cm->id, 'sesskey' => sesskey ()));
         $node = navigation_node::create ("Odevzdat řešení", $url,
                                          navigation_node::TYPE_SETTING, null, 'mod_codiana_view');
-        $codiananode->add_node ($node, $keys[0]);
+        $codiananode->add_node ($node, sizeof($keys) > 0 ? $keys[0] : null);
     }
 
 //    $url = new moodle_url('/mod/codiana/submitsolution.php');
