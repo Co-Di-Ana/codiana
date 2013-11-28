@@ -37,11 +37,21 @@ require_once ($CFG->libdir . '/formslib.php');
 class mod_codiana_submitsolution_form extends moodleform {
 
 
-    /** @var string  */
+    /** @var string */
     public $extension;
 
-    /** @var string  */
+    /** @var string */
     public $defaultExtension;
+
+    /** @var stdClass */
+    public $codiana;
+
+
+
+    public function __construct ($codiana, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->codiana = $codiana;
+        parent::__construct ($action, $customdata, $method, $target, $attributes, $editable);
+    }
 
 
 
@@ -50,14 +60,7 @@ class mod_codiana_submitsolution_form extends moodleform {
         $mform = $this->_form;
 
 
-        // TODO only allowed extension
-        $result = $DB->get_records ('codiana_language', null, '', 'extension,name');
-        $languages = array ();
-        $filter = '*.zip';
-        foreach ($result as $language) {
-            $languages[$language->extension] = $language->name;
-            $filter .= ',*.' . $language->extension;
-        }
+        $languages = codiana_get_task_languages ($this->codiana);
         reset ($languages);
         $selected = key ($languages);
 
@@ -75,7 +78,7 @@ class mod_codiana_submitsolution_form extends moodleform {
         $mform->addElement ('filepicker', 'sourcefile', get_string ('codiana:sourcefile', 'codiana'), null,
                             array (
                                   'maxbytes' => $CFG->maxbytes,
-                                  'accepted_types' => $filter
+                                  'accepted_types' => '*'
                             )
         );
         $mform->setType ('sourcefile', PARAM_RAW);
