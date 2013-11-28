@@ -35,65 +35,114 @@ class mod_codiana_renderer extends plugin_renderer_base {
     /** @var mixed */
     private $context;
 
-
     /** @var mixed */
     private $cm;
+
+    /** @var array */
+    private $messages;
+
+    /** @var mixed */
+    private $course;
+
+
+
+    public function init ($codiana, $cm, $context, $course, $messages = array ()) {
+        $this->codiana = new Codiana($codiana);
+        $this->cm = $cm;
+        $this->context = $context;
+        $this->messages = $messages;
+        $this->course = $course;
+    }
 
 
 
     /**
      * Generates page for guests
-     *
-     * @param int $course The course ID
-     * @param stdClass $codiana Array contingin quiz data
-     * @param int $cm Course Module ID
-     * @param int $context The page contect ID
-     * @param array $messages Array containing any messages
-     * @return string HTML to output.
      */
-    public function view_page_guest ($course, $codiana, $cm, $context, $messages) {
-        global $CFG;
-        $this->codiana = new Codiana($codiana);
-        $this->cm = $cm;
-        $this->context = $context;
+    public function view_page_guest () {
 
         $output = '';
-        $output .= $this->view_information ($this->codiana, $cm, $context, $messages);
-
-        //        $table = new html_table();
-//        $table->attributes['class'] = 'generaltable codianaattemptsummary';
-//        $table->head = array ();
-//        $table->align = array ();
-//        $table->size = array ();
-//
-//        $table->align[] = 'center';
-//        $table->size[] = '';
-//        $table->head[] = get_string ('grade');
-//        $table->align[] = 'center';
-//        $table->size[] = '';
-//        $table->head[] = get_string ('review', 'quiz');
-//        $table->align[] = 'center';
-//        $table->size[] = '';
-//        $table->head[] = get_string ('feedback', 'quiz');
-//        $table->align[] = 'left';
-//        $table->size[] = '';
-//        $table->data = array (array ('cascas', 'cascas', 'ndfgngf', 'bdf'), array ('cascas', 'cascas', 'ndfgngf', 'bdf'));
-//        $output .= html_writer::table ($table);
+        $output .= $this->view_information ();
         return $output;
+    }
+
+
+
+    public function view_page_viewmyattempts ($attempts) {
+        if (sizeof ($attempts) == 0) {
+            $output = '';
+            $output .= html_writer::tag ('h1', 'No attempts yet');
+            $output .= html_writer::start_span ();
+            $output .= 'You can submit you solution ';
+            $output .= html_writer::link (
+                new moodle_url ('/mod/codiana/submitsolution.php', array ('id' => $this->cm->id)),
+                'here');
+            $output .= html_writer::end_span ();
+            return $output;
+        }
+
+        $output = '';
+        $output .= html_writer::tag ('h1', sprintf ("Results for task '%s'", $this->codiana->name));
+
+        $table = new html_table();
+        $table->attributes['class'] = 'generaltable codianaattemptsummary';
+        $table->attributes['style'] = 'width: 100%';
+        $table->head = array ();
+        $table->align = array ();
+        $table->size = array ();
+
+
+        $ignores = array ('id', 'taskid', 'userid');
+        $keys = array_keys ((array)$attempts[key ($attempts)]);
+
+        foreach ($keys as $key => $value) {
+            if (in_array ($value, $ignores)) {
+                unset ($keys[$key]);
+                continue;
+            }
+            $table->align[] = 'center';
+            $table->size[] = '';
+            $table->head[] = $value;
+        }
+
+        $data = array ();
+        foreach ($attempts as $attempt) {
+            $row = array ();
+            foreach ($keys as $key)
+                $row[] = $this->view_cell_value ($key, $attempt->$key);
+            $data[] = $row;
+        }
+        $table->data = $data;
+        $output .= html_writer::table ($table);
+
+        return $output;
+    }
+
+
+
+    private function view_cell_value ($name, $value) {
+        switch ($name) {
+
+            case 'detail':
+                return $value == 0 ? 'simple' : 'complex';
+
+            case 'timesent':
+                return date ('H:i:s  (m.d.Y)', $value);
+
+            case 'state':
+                return codiana_state::get ($value);
+
+            default:
+                return is_null ($value) ? '-' : $value;
+        }
     }
 
 
 
     /**
      * Output the page information
-     *
-     * @param Codiana $codiana the quiz settings.
-     * @param object $cm the course_module object.
-     * @param object $context the quiz context.
-     * @param array $messages any access messages that should be described.
-     * @return string HTML to output.
      */
-    private function view_information (Codiana $codiana, $cm, $context, $messages) {
+    private function view_information () {
         global $CFG;
         $output = '';
         $output .= $this->view_head ();

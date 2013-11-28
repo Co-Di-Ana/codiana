@@ -77,7 +77,8 @@ $output = $PAGE->get_renderer('mod_codiana');
 // Output starts here
 echo $OUTPUT->header ();
 
-echo $output->view_page_guest ($course, $codiana, $cm, $context, array());
+$output->init ($codiana, $cm, $context, array(), $course);
+echo $output->view_page_guest ();
 
 // Finish the page
 echo $OUTPUT->footer ();
