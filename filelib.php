@@ -26,6 +26,10 @@ interface IFileTransfer {
 
 
 
+    public function unzip ($zipLocation, $dirLocation);
+
+
+
     public function setConfig ($object);
 }
 
@@ -165,6 +169,12 @@ class RemoteFileTransfer implements IFileTransfer {
 
 
 
+    public function unzip ($zipLocation, $dirLocation) {
+        // TODO: Implement unzip() method.
+    }
+
+
+
     public function setConfig ($object) {
         if (!is_object ($object))
             $object = (object)$object;
@@ -225,19 +235,22 @@ class LocalFileTransfer implements IFileTransfer {
             return false;
         }
 
-        $dirLocation = str_replace ('\\', '/', realpath ($dirLocation));
+        $dirLocation = realpath ($dirLocation);
+        $dirLocation = str_replace ('\\', '/', $dirLocation);
 
         if (is_dir ($dirLocation) === true) {
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dirLocation), RecursiveIteratorIterator::SELF_FIRST);
 
             foreach ($files as $file) {
+
                 $file = str_replace ('\\', '/', $file);
 
                 // Ignore "." and ".." folders
                 if (in_array (substr ($file, strrpos ($file, '/') + 1), array ('.', '..')))
                     continue;
 
-                $file = realpath ($file);
+                // path format protection
+                $file = str_replace ('\\', '/', realpath ($file));
 
                 if (is_dir ($file) === true) {
                     $zip->addEmptyDir (str_replace ($dirLocation . '/', '', $file . '/'));
@@ -250,6 +263,19 @@ class LocalFileTransfer implements IFileTransfer {
         }
 
         return $zip->close ();
+    }
+
+
+
+    public function unzip ($zipLocation, $dirLocation) {
+        $zip = new ZipArchive;
+        $res = $zip->open ($zipLocation);
+        if ($res === TRUE) {
+            $zip->extractTo ($dirLocation);
+            return $zip->close ();
+        } else {
+            return false;
+        }
     }
 
 
