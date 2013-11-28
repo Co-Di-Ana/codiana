@@ -27,6 +27,8 @@
 defined ('MOODLE_INTERNAL') || die();
 
 require_once ($CFG->dirroot . '/mod/codiana/lib.php');
+require_once ($CFG->dirroot . '/mod/codiana/settingslib.php');
+require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 
 $settings->add (
     new admin_setting_configtext(
@@ -62,7 +64,7 @@ $settings->add (
     new admin_setting_configcheckbox(
         'codiana/islocal',
         get_string ('codiana:setting:islocal', 'codiana'),
-        get_string ('codiana:setting:islocal', 'codiana'),
+        get_string ('codiana:setting:islocal_desc', 'codiana'),
         1
     )
 );
@@ -96,3 +98,34 @@ $settings->add (
         ''
     )
 );
+
+$group = new admin_setting_configmulticheckbox_base_group(
+    'codiana/setting',
+    'Setting',
+    'settings',
+    '174847',
+    codiana_display_options::$fields
+);
+
+$group->add (
+    'Active task and solver',
+    'popis',
+    codiana_display_options::OPEN_SOLVER
+);
+$group->add (
+    'Task over and solver',
+    'popis',
+    codiana_display_options::CLOSE_SOLVER
+);
+$group->add (
+    'Active task and others',
+    'popis',
+    codiana_display_options::OPEN_OTHERS
+);
+$group->add (
+    'Task over and others',
+    'popis',
+    codiana_display_options::CLOSE_OTHERS
+);
+
+$settings->add ($group);

@@ -29,6 +29,7 @@
 defined ('MOODLE_INTERNAL') || die();
 
 require_once ($CFG->dirroot . '/course/moodleform_mod.php');
+require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 
 /**
  * Module instance settings form
@@ -38,7 +39,11 @@ class mod_codiana_mod_form extends moodleform_mod {
     /** @var MoodleQuickForm */
     private $mform;
 
+    /** @var bool */
     private $isEditing;
+
+    /** @var int */
+    private $settingIndex = 0;
 
 
 
@@ -67,6 +72,7 @@ class mod_codiana_mod_form extends moodleform_mod {
         // ----- GENERAL ---------------------------------------------------------------
         // -----------------------------------------------------------------------------
         $this->mform->addElement ('header', 'taskgeneral', get_string ('general', 'form'));
+        $this->mform->setExpanded ('taskgeneral');
         {
             // task name
             $this->addTaskNameElement ();
@@ -92,6 +98,7 @@ class mod_codiana_mod_form extends moodleform_mod {
         // ----- AVAILABLITY -----------------------------------------------------------
         // -----------------------------------------------------------------------------
         $this->mform->addElement ('header', 'taskavailability', get_string ('codiana:section:availability', 'codiana'));
+        $this->mform->setExpanded ('taskavailability');
         {
             // task available from date
             $this->addTaskRangeFromElement ();
@@ -106,6 +113,7 @@ class mod_codiana_mod_form extends moodleform_mod {
         // ----- LIMITS ----------------------------------------------------------------
         // -----------------------------------------------------------------------------
         $this->mform->addElement ('header', 'tasklimits', get_string ('codiana:section:limits', 'codiana'));
+        $this->mform->setExpanded ('tasklimits');
         {
             // task available from date
             $this->addTaskMaxUsersElement ();
@@ -128,6 +136,7 @@ class mod_codiana_mod_form extends moodleform_mod {
         // -----------------------------------------------------------------------------
         $this->mform->addElement ('header', 'taskfiles', get_string ('codiana:section:files', 'codiana'));
         $this->mform->addHelpButton ('taskfiles', 'codiana:section:files', 'codiana');
+        $this->mform->setExpanded ('taskfiles');
         {
             // task solution file
             $this->addTaskSolutionFileElement ();
@@ -147,6 +156,7 @@ class mod_codiana_mod_form extends moodleform_mod {
         // ----- I/O EXAMPLES ----------------------------------------------------------
         // -----------------------------------------------------------------------------
         $this->mform->addElement ('header', 'taskexamples', get_string ('codiana:section:examples', 'codiana'));
+        $this->mform->setExpanded ('taskexamples');
         {
             // task input example
             $this->addTaskInputExample ();
@@ -155,6 +165,15 @@ class mod_codiana_mod_form extends moodleform_mod {
             $this->addTaskOutputExample ();
         }
 
+        // -----------------------------------------------------------------------------
+        // ----- RESULTS ---------------------------------------------------------------
+        // -----------------------------------------------------------------------------
+        $this->mform->addElement ('header', 'taskresults', get_string ('codiana:section:results', 'codiana'));
+        $this->mform->setExpanded ('taskresults');
+        {
+            // task setitngs
+            $this->addTaskSettings ();
+        }
 
         //-------------------------------------------------------------------------------
         // add standard elements, common to all modules
@@ -385,8 +404,52 @@ class mod_codiana_mod_form extends moodleform_mod {
 
 
 
+    private function addTaskInputExample () {
+        $this->mform->addElement ('textarea', 'inputexample', get_string ('codiana:inputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
+        $this->mform->setType ('inputexample', PARAM_TEXT);
+        $this->mform->addHelpButton ('inputexample', 'codiana:inputexample', 'codiana');
+    }
+
+
+
+    private function addTaskOutputExample () {
+        $this->mform->addElement ('textarea', 'outputexample', get_string ('codiana:outputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
+        $this->mform->setType ('outputexample', PARAM_TEXT);
+        $this->mform->addHelpButton ('outputexample', 'codiana:outputexample', 'codiana');
+    }
+
+
+
+    private function addTaskSettings () {
+        $this->settingIndex = 0;
+        $this->addTaskSettingBlock ('opensolver', codiana_display_options::OPEN_SOLVER);
+        $this->addTaskSettingBlock ('closesolver', codiana_display_options::CLOSE_SOLVER);
+        $this->addTaskSettingBlock ('openothers', codiana_display_options::OPEN_OTHERS);
+        $this->addTaskSettingBlock ('closeothers', codiana_display_options::CLOSE_OTHERS);
+    }
+
+
+
+    private function addTaskSettingBlock ($name, $shift) {
+        $group = array ();
+        $i = 0;
+        foreach (codiana_display_options::$fields as $field) {
+            $group[] = $this->mform->createElement (
+                'advcheckbox',
+                "setting" . "[$this->settingIndex]", '', $field,
+                array ('group' => $shift),
+                array (0, 1 << ($i + $shift)));
+            $i += codiana_display_options::COUNT;
+            $this->settingIndex++;
+        }
+        $this->mform->addGroup ($group, $name, $name, '<br />', false);
+        $this->add_checkbox_controller ($shift);
+    }
+
+
+
     function validation ($data, $files) {
-        global $CFG, $DB;
+        global $CFG;
         require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
         $errors = parent::validation ($data, $files);
 
@@ -464,6 +527,14 @@ class mod_codiana_mod_form extends moodleform_mod {
         $codiana->cmidnumber = @$codiana->cmidnumber;
         $codiana->groupmode = @$codiana->groupmode;
 
+        if (!is_array (@$codiana->setting)) {
+            $errors['opensolver'] = 'invalid data';
+            $errors['closesolver'] = 'invalid data';
+            $errors['openothers'] = 'invalid data';
+            $errors['closeothers'] = 'invalid data';
+        }
+
+
         return $errors;
     }
 
@@ -476,34 +547,39 @@ class mod_codiana_mod_form extends moodleform_mod {
     public function data_preprocessing (&$toform) {
         parent::data_preprocessing ($toform);
 
+        // fill languages
         if (isset ($toform['languages'])) {
             //TODO secure language values
             $value = trim ($toform['languages']);
-            $toform['languages'] = explode(',', $value);
+            $toform['languages'] = explode (',', $value);
         }
 
+        // set default values
+        if (!isset ($toform['settings']))
+            $toform['settings'] = get_config ('codiana', 'setting');
+
+        // fill setting
+        if (isset ($toform['settings'])) {
+            $settings = intval ($toform['settings']);
+            $toform['setting'] = array ();
+
+            $j = 0;
+            foreach (codiana_display_options::$types as $shift) {
+                $i = 0;
+                foreach (codiana_display_options::$fields as $field) {
+                    $toform['setting'][$j++] = intval ($settings & (1 << ($i + $shift)));
+                    $i += codiana_display_options::COUNT;
+                }
+            }
+        }
+
+        // enabled fields
         $checkFields = array (
             'maxusers', 'maxattempts', 'limittime', 'limitmemory',
             'timeopen', 'timeclose');
-
         foreach ($checkFields as $field)
             if (isset ($toform[$field]))
                 $toform[$field . '_enabled'] = intval ($toform[$field]) > 0;
     }
 
-
-
-    private function addTaskInputExample () {
-        $this->mform->addElement ('textarea', 'inputexample', get_string ('codiana:inputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
-        $this->mform->setType ('inputexample', PARAM_TEXT);
-        $this->mform->addHelpButton ('inputexample', 'codiana:inputexample', 'codiana');
-    }
-
-
-
-    private function addTaskOutputExample () {
-        $this->mform->addElement ('textarea', 'outputexample', get_string ('codiana:outputexample', 'codiana'), 'wrap="virtual" rows="10" cols="100" class="codiana_monospaced"');
-        $this->mform->setType ('outputexample', PARAM_TEXT);
-        $this->mform->addHelpButton ('outputexample', 'codiana:outputexample', 'codiana');
-    }
 }

@@ -149,6 +149,8 @@ function codiana_preprocess (stdClass $codiana) {
     $codiana->cmidnumber = @$codiana->cmidnumber;
     $codiana->groupmode = @$codiana->groupmode;
 
+    $codiana->settings = array_sum(@$codiana->setting);
+
     return true;
 }
 
@@ -471,12 +473,20 @@ function codiana_extend_settings_navigation (settings_navigation $settingsnav, n
     global $PAGE, $CFG;
 
     $keys = $codiananode->get_children_key_list ();
+    $beforeKey = sizeof($keys) > 0 ? $keys[0] : null;
 
     if (has_capability ('mod/codiana:submitsolution', $PAGE->cm->context)) {
         $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $PAGE->cm->id, 'sesskey' => sesskey ()));
         $node = navigation_node::create ("Odevzdat řešení", $url,
-                                         navigation_node::TYPE_SETTING, null, 'mod_codiana_view');
-        $codiananode->add_node ($node, sizeof($keys) > 0 ? $keys[0] : null);
+                                         navigation_node::TYPE_SETTING, null, 'mod_codiana_submitsolution');
+        $codiananode->add_node ($node, $beforeKey);
+    }
+
+    if (has_capability ('mod/codiana:viewmyattempts', $PAGE->cm->context)) {
+        $url = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $PAGE->cm->id, 'sesskey' => sesskey ()));
+        $node = navigation_node::create ("Zobrazit výsledky", $url,
+                                         navigation_node::TYPE_SETTING, null, 'mod_codiana_viewmyattempts');
+        $codiananode->add_node ($node, $beforeKey);
     }
 
 //    $url = new moodle_url('/mod/codiana/submitsolution.php');
