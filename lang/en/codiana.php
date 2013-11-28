@@ -95,6 +95,7 @@ $string['codiana:section:availability'] = 'Availabilty';
 $string['codiana:section:limits'] = 'Limits';
 $string['codiana:section:files'] = 'Files';
 $string['codiana:section:examples'] = 'I/O examples';
+$string['codiana:section:results'] = 'View options';
 
 $string['codiana:section:files_help'] = 'Upload either solution or output';
 
@@ -121,3 +122,17 @@ $string['codiana:setting:islocal_desc'] = 'Specify whether is storage local, if 
 $string['codiana:setting:storagepath_desc'] = 'Specify where will be codiana data stored';
 $string['codiana:setting:sshusername_desc'] = 'If storage is remote, specify username for ssh conenction, otherwise leave it blank';
 $string['codiana:setting:sshpassword_desc'] = 'If storage is remote, specify password for ssh conenction, otherwise leave it blank';
+
+
+// states
+$string['codiana:state:waitingtoprocess'] = 'Waiting to process';
+$string['codiana:state:correctsolution'] = 'Correct solution';
+$string['codiana:state:wrongsolution'] = 'Wrong solution';
+$string['codiana:state:maxtimelimit'] = 'Reached maximum time limit';
+$string['codiana:state:maxmemorylimit'] = 'Reached maximum memory limit';
+$string['codiana:state:compilationerror'] = 'Compilation error';
+$string['codiana:state:runerror'] = 'Run error';
+$string['codiana:state:looperror'] = 'Solution looped';
+$string['codiana:state:dangerouscode'] = 'Dangerous code';
+$string['codiana:state:nomainclass'] = 'Cannot locate main class';
+$string['codiana:state:unkwnownerror'] = 'Unknown error';
