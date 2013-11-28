@@ -82,7 +82,7 @@ $capabilities = array (
     ),
 
 
-    //# ----- capability to view ones results ------------------------------------------------------
+    //# ----- capability to view results -----------------------------------------------------------
     'mod/codiana:viewresults' => array (
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
