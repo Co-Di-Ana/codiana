@@ -46,6 +46,7 @@
  */
 defined ('MOODLE_INTERNAL') || die ();
 
+// TODO add guest restricted area (cap 'view')
 $capabilities = array (
     //# ----- capability to create new instance of codiana -----------------------------------------
     'mod/codiana:addinstance' => array (
@@ -121,8 +122,10 @@ $capabilities = array (
             'manager' => CAP_ALLOW
         )
     ),
-    //# ----- capability to have higher priority ---------------------------------------------------
-    'mod/codiana:queueimportance' => array (
+    //# ----- capability to have higher priority in queue ------------------------------------------
+    //# ----- capability to have unlimited number of attempts --------------------------------------
+    //# ----- capability to see all results --------------------------------------------------------
+    'mod/codiana:manager' => array (
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array (
