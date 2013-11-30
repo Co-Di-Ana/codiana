@@ -106,20 +106,11 @@ if (!$canSubmit) {
         $dataDir = get_config ('codiana', 'storagepath');
         $codianaID = sprintf ('task-%04d', $codiana->id);
         $userID = sprintf ('user-%05d', $USER->id);
-        $prevAttempt = sprintf ('attempt-%03d', $totalAttempts);
         $newAttempt = sprintf ('attempt-%03d', $totalAttempts + 1);
         $mainfilename = $codiana->mainfilename;
 
         // grap codiana_get_file_transfer object
         $fileTransfer = codiana_get_file_transfer ();
-
-        // zip previoussolution
-        if ($totalAttempts > 0) {
-            $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/curr/");
-            $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/prev/");
-            $fileTransfer->zipDir ("$dataDir/$codianaID/$userID/curr/",
-                                   "$dataDir/$codianaID/$userID/prev/$prevAttempt.zip");
-        }
 
         // delete old solution
         $fileTransfer->deleteDir ("$dataDir/$codianaID/$userID/curr/");
@@ -136,6 +127,13 @@ if (!$canSubmit) {
             $fileTransfer->deleteFile ("$dataDir/$codianaID/$userID/curr/$mainfilename.$mform->defaultExtension");
         }
 
+        // zip solution
+        $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/curr/");
+        $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/prev/");
+        $fileTransfer->zipDir ("$dataDir/$codianaID/$userID/curr/",
+                               "$dataDir/$codianaID/$userID/prev/$newAttempt.zip");
+
+        // TODO use is_zip comparison, not == 'zip'
         $attempt = array (
             'taskid' => $codiana->id,
             'userid' => $USER->id,
@@ -143,6 +141,7 @@ if (!$canSubmit) {
             'state' => 0,
             'language' => $mform->extension,
             'detail' => $mform->defaultExtension == 'zip' ? 1 : 0,
+            'ordinal' => $totalAttempts + 1
         );
 
         $attemptID = $DB->insert_record (
