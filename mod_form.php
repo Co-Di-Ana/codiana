@@ -486,10 +486,10 @@ class mod_codiana_mod_form extends moodleform_mod {
             $errors['mainfilename'] = 'regexp';
 
 
-        if (in_array(@$codiana->grademethod, array_keys(codiana_grade_method::$types)) == false)
+        if (in_array (@$codiana->grademethod, array_keys (codiana_grade_method::$types)) == false)
             $errors['grademethod'] = 'invalid value';
 
-        if (in_array(@$codiana->outputmethod, array_keys(codiana_output_method::$types)) == false)
+        if (in_array (@$codiana->outputmethod, array_keys (codiana_output_method::$types)) == false)
             $errors['outputmethod'] = 'invalid value';
 
 
@@ -530,13 +530,20 @@ class mod_codiana_mod_form extends moodleform_mod {
         if (!codiana_check_int ($codiana, 'maxattempts', false))
             $errors['maxattempts_group'] = 'must be non zero integer';
 
-
-        if (!codiana_check_int ($codiana, 'limittime', false))
+        $a = codiana_check_int ($codiana, 'limittimefalling', false);
+        $b = codiana_check_int ($codiana, 'limittimenothing', false);
+        if (!$a || !$b)
             $errors['limittime_group'] = 'must be non zero integer';
+        else if (@$codiana->limittimenothing < @$codiana->limittimefalling)
+            $errors['limittime_group'] = 'zero point value must be smaller than 100% point value';
 
 
-        if (!codiana_check_int ($codiana, 'limitmemory', false))
+        $a = codiana_check_int ($codiana, 'limitmemoryfalling', false);
+        $b = codiana_check_int ($codiana, 'limitmemorynothing', false);
+        if (!$a || !$b)
             $errors['limitmemory_group'] = 'must be non zero integer';
+        else if (@$codiana->limitmemorynothing < @$codiana->limitmemoryfalling)
+            $errors['limitmemory_group'] = 'zero point value must be smaller than 100% point value';
 
 
         $codiana->solutionfile = @$codiana->solutionfile;

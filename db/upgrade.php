@@ -69,25 +69,25 @@ function xmldb_codiana_upgrade ($oldversion) {
 
     // First example, some fields were added to install.xml on 2007/04/01
 
-    if ($oldversion < 2013110501) {
-
-        // Define field course to be added to codiana
-        $table = new xmldb_table('codiana');
-        $field = new xmldb_field('taskinputexample', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, 'tasklimitmemory');
-        // Add field course
-        if (!$dbman->field_exists ($table, $field)) {
-            $dbman->add_field ($table, $field);
-        }
-
-        $field = new xmldb_field('taskoutputexample', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, 'tasklimitmemory');
-        // Add field course
-        if (!$dbman->field_exists ($table, $field)) {
-            $dbman->add_field ($table, $field);
-        }
-
-        // Once we reach this point, we can store the new version and consider the module
-        // upgraded to the version 2007040100 so the next time this block is skipped
-        upgrade_mod_savepoint (true, 2013110501, 'codiana');
-    }
+//    if ($oldversion < 2013110501) {
+//
+//        // Define field course to be added to codiana
+//        $table = new xmldb_table('codiana');
+//        $field = new xmldb_field('taskinputexample', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, 'tasklimitmemory');
+//        // Add field course
+//        if (!$dbman->field_exists ($table, $field)) {
+//            $dbman->add_field ($table, $field);
+//        }
+//
+//        $field = new xmldb_field('taskoutputexample', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, 'tasklimitmemory');
+//        // Add field course
+//        if (!$dbman->field_exists ($table, $field)) {
+//            $dbman->add_field ($table, $field);
+//        }
+//
+//        // Once we reach this point, we can store the new version and consider the module
+//        // upgraded to the version 2007040100 so the next time this block is skipped
+//        upgrade_mod_savepoint (true, 2013110501, 'codiana');
+//    }
     return true;
 }

@@ -175,7 +175,7 @@ class codiana_output_method {
  * @param stdClass $codiana
  * @param string $prop
  * @param bool $required
- * @return bool success/failure
+ * @return bool success/failure 0 is return false
  */
 function codiana_check_int ($codiana, $prop, $required = true) {
     if (!isset ($codiana->$prop)) {
@@ -189,7 +189,6 @@ function codiana_check_int ($codiana, $prop, $required = true) {
     if (intval ($codiana->$prop) == 0)
         return false;
     return true;
-
 }
 
 /**
@@ -275,7 +274,7 @@ function codiana_get_supported_languages () {
     foreach ($result as $language)
         $languages[$language->extension] = $language->name;
 
-    return $result;
+    return $languages;
 }
 
 /**
@@ -412,8 +411,13 @@ function codiana_get_strings_from_array ($array) {
 }
 
 
-function codiana_is_task_open ($task) {
-    $time = time ();
+/**
+ * @param $task stdClass task object
+ * @param $time int default time value, if null, current time will be used
+ * @return bool wheter is task in open state (depends on time)
+ */
+function codiana_is_task_open ($task, $time = null) {
+    $time = $time == null ? time () : intval ($time);
     $open = $task->timeopen;
     $close = $task->timeclose;
 
@@ -454,7 +458,7 @@ function codiana_get_task_state ($isOpen, $isSolver) {
 
 /**
  * @param $task stdClass task
- * @param $mask task state based on time and user
+ * @param $mask int task state based on time and user
  * @return array of allowed fields groups/fields
  */
 function codiana_get_task_fields ($task, $mask) {

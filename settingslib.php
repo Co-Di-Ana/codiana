@@ -24,12 +24,6 @@
  */
 class admin_setting_configmulticheckbox_base extends admin_setting_configmulticheckbox {
 
-    /** @var int */
-    private $length = 2;
-
-    /** @var int */
-    private $totalLength;
-
     /** @var mixed */
     private $setting;
 
@@ -52,7 +46,6 @@ class admin_setting_configmulticheckbox_base extends admin_setting_configmultich
      * @param int $shift
      */
     public function __construct ($name, $visiblename, $description, $defaultsetting, $choices, $shift) {
-        $this->totalLength = count ($this->choices) * $this->length;
         $this->shift = intval ($shift);
         parent::__construct ($name, $visiblename, $description, $defaultsetting, $choices);
     }

@@ -57,7 +57,6 @@ $PAGE->set_heading (format_string ($course->fullname));
 $PAGE->set_context ($context);
 $PAGE->requires->css('/mod/codiana/html/css/view.css', false);
 //$PAGE->requires->jquery ();
-//$PAGE->requires->js ('/mod/codiana/html/js/mod_form.js', true);
 /** @var mod_codiana_renderer  */
 $output = $PAGE->get_renderer('mod_codiana');
 
