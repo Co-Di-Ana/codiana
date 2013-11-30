@@ -129,7 +129,7 @@ class RemoteFileTransfer implements IFileTransfer {
         $result = file_get_contents ($uri, FILE_BINARY);
         fclose ($tmpFile);
         if ($result == false)
-            throw new Exception ('Error reading temp file');
+            throw new moodle_exception ('codiana:error:filedoesnotexists', 'codiana');
 
         return $result;
     }
@@ -197,6 +197,8 @@ class LocalFileTransfer implements IFileTransfer {
 
 
     public function loadFile ($path) {
+        if (!file_exists($path))
+            throw new moodle_exception ('codiana:error:filedoesnotexists', 'codiana');
         return file_get_contents ($path, FILE_BINARY);
     }
 
