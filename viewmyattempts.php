@@ -67,11 +67,20 @@ global $OUTPUT;
 
 //# ----- OUTPUT ----------------------------------------------------------------
 
+$fields = codiana_get_task_fields (
+    $codiana, codiana_is_task_open ($codiana) ?
+                codiana_display_options::OPEN_SOLVER :
+                codiana_display_options::CLOSE_SOLVER);
+$mysqlFields = codiana_expand_fields ($fields);
+// user do not need to see their own username
+unset ($mysqlFields['username']);
 
-$attempts = codiana_get_all_attempts ($codiana, $USER->id);
+// grab results
+$allAttempts = codiana_get_all_attempts ($codiana, $USER->id, $mysqlFields);
+$gradeAttempt = codiana_get_grade_attempt ($codiana, $USER->id, $mysqlFields);
 
 
 
 echo $OUTPUT->header ();
-echo $output->view_page_viewmyattempts ($attempts);
+echo $output->view_page_viewmyattempts ($gradeAttempt, $allAttempts);
 echo $OUTPUT->footer ();

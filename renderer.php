@@ -68,21 +68,46 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
 
 
-    public function view_page_viewmyattempts ($attempts) {
-        if (sizeof ($attempts) == 0) {
-            $output = '';
+    public function view_page_viewmyattempts ($gradeAttempt, $attempts) {
+
+        $output = '';
+
+        // no grade attempt means no attempts either
+        if ($gradeAttempt == null) {
             $output .= html_writer::tag ('h1', 'No attempts yet');
             $output .= html_writer::start_span ();
             $output .= 'You can submit you solution ';
             $output .= html_writer::link (
-                new moodle_url ('/mod/codiana/submitsolution.php', array ('id' => $this->cm->id)),
+                new moodle_url (
+                    '/mod/codiana/submitsolution.php', array ('id' => $this->cm->id)),
                 'here');
             $output .= html_writer::end_span ();
             return $output;
+
+        } else {
+            $output .= html_writer::tag ('h1', sprintf ("Results for task '%s'", $this->codiana->name));
+            $output .= $this->view_attempts_table (array ($gradeAttempt));
         }
 
+
+        // remove from all attempts
+        if (array_key_exists ($gradeAttempt->id, $attempts))
+            unset ($attempts[$gradeAttempt->id]);
+
+
+
+        if (sizeof ($attempts) > 0) {
+            $output .= html_writer::tag ('h1', sprintf ("Other results for task '%s'", $this->codiana->name));
+            $output .= $this->view_attempts_table ($attempts);
+        }
+
+        return $output;
+    }
+
+
+
+    private function view_attempts_table ($attempts) {
         $output = '';
-        $output .= html_writer::tag ('h1', sprintf ("Results for task '%s'", $this->codiana->name));
 
         $table = new html_table();
         $table->attributes['class'] = 'generaltable codianaattemptsummary';
@@ -95,6 +120,11 @@ class mod_codiana_renderer extends plugin_renderer_base {
         $ignores = array ('id', 'taskid', 'userid');
         $keys = array_keys ((array)$attempts[key ($attempts)]);
 
+        if (in_array('ordinal', $keys)) {
+            unset($keys[array_search('ordinal', $keys)]);
+            $keys = array_merge(array ('ordinal'), $keys);
+        }
+
         foreach ($keys as $key => $value) {
             if (in_array ($value, $ignores)) {
                 unset ($keys[$key]);
@@ -105,11 +135,12 @@ class mod_codiana_renderer extends plugin_renderer_base {
             $table->head[] = $value;
         }
 
+        $i = count($attempts);
         $data = array ();
         foreach ($attempts as $attempt) {
             $row = array ();
             foreach ($keys as $key)
-                $row[] = $this->view_cell_value ($key, $attempt->$key);
+                $row[] = $this->view_cell_value ($key, $attempt->$key, $attempt);
             $data[] = $row;
         }
         $table->data = $data;
@@ -120,7 +151,7 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
 
 
-    private function view_cell_value ($name, $value) {
+    private function view_cell_value ($name, $value, $attempt=null) {
         switch ($name) {
 
             case 'detail':
@@ -131,6 +162,16 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
             case 'state':
                 return codiana_state::get ($value);
+            case 'code':
+                return html_writer::link(
+                    new moodle_url(
+                        '/mod/codiana/sourcecode.php',
+                        array (
+                              'id' => $this->cm->id,
+                              'userid' => $attempt->userid,
+                              'ordinal' => $attempt->ordinal
+                        )
+                    ), 'download');
 
             default:
                 return is_null ($value) ? '-' : $value;
