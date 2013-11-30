@@ -43,10 +43,14 @@ $string['pluginname'] = 'codiana';
 $string['codiana:name'] = 'Task name';
 $string['codiana:mainfilename'] = 'Task main file name';
 $string['codiana:difficulty'] = 'Task Difficulty';
+$string['codiana:outputmethod'] = 'Output method';
+$string['codiana:outputmethod:strict'] = 'strict comparison';
+$string['codiana:outputmethod:tolerant'] = 'tolerant comparison';
+$string['codiana:outputmethod:vague'] = 'vague comparison';
 $string['codiana:grademethod'] = 'Grade method';
-$string['codiana:grademethod:strict'] = 'strict method';
-$string['codiana:grademethod:tolerant'] = 'tolerant method';
-$string['codiana:grademethod:vague'] = 'vague method';
+$string['codiana:grademethod:first'] = 'First sent solution';
+$string['codiana:grademethod:last'] = 'Last sent solution';
+$string['codiana:grademethod:best'] = 'The best solution sent';
 $string['codiana:languages'] = 'Allowed languages';
 $string['codiana:timeopen'] = 'Avaiable from date';
 $string['codiana:timeclose'] = 'Avaiable to date';
@@ -68,6 +72,7 @@ $string['codiana:solutionlanguage'] = 'Solution language';
 $string['codiana:name_help'] = 'Task name help';
 $string['codiana:mainfilename_help'] = 'Task main file name help';
 $string['codiana:difficulty_help'] = 'Difficulty help';
+$string['codiana:outputmethod_help'] = 'Grade method help';
 $string['codiana:grademethod_help'] = 'Grade method help';
 $string['codiana:languages_help'] = 'Languages help';
 $string['codiana:timeopen_help'] = 'Open help';
@@ -136,3 +141,8 @@ $string['codiana:state:looperror'] = 'Solution looped';
 $string['codiana:state:dangerouscode'] = 'Dangerous code';
 $string['codiana:state:nomainclass'] = 'Cannot locate main class';
 $string['codiana:state:unkwnownerror'] = 'Unknown error';
+
+
+// error
+$string['codiana:error:youcannotdownloadthissolution'] = "You don't have sufficient permissions to download this file!";
+$string['codiana:error:filedoesnotexists'] = "File you're looking for does't exists!";
