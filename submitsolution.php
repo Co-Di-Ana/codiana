@@ -61,8 +61,6 @@ $context = context_module::instance ($cm->id);
 global $OUTPUT;
 
 
-
-
 //# ----- OUTPUT ----------------------------------------------------------------
 
 
@@ -70,14 +68,17 @@ global $OUTPUT;
 $totalAttempts = $DB->count_records ('codiana_attempt', array ('userid' => $USER->id, 'taskid' => $codiana->id));
 $maxAttempts = $DB->get_field ('codiana', 'maxattempts', array ('id' => $codiana->id), MUST_EXIST);
 $canSubmit = $totalAttempts < $maxAttempts;
+$lastAttempt = codiana_get_last_attempt ($codiana, $USER->id);
+$warning = $totalAttempts > 0 && $lastAttempt->state == codiana_state::WAITINGTOPROCESS;
+
 
 if (!$canSubmit) {
     echo $OUTPUT->header ();
     echo html_writer::tag ('h1', 'No more attempts');
     echo html_writer::tag ('p', 'You have reached limit of maximum possible attempts.');
     echo $OUTPUT->footer ();
-} else {
 
+} else {
 
 
     $mform = new mod_codiana_submitsolution_form ($codiana, $url);
@@ -85,9 +86,11 @@ if (!$canSubmit) {
 // Form processing and displaying
     if ($mform->is_cancelled ()) {
         // form canceled
+
         echo $OUTPUT->header ();
     } else if ($data = $mform->get_data ()) {
         // form is valid, now file check
+
 
         // file extension support check
         $error = $mform->validate_solution_file ($codiana);
@@ -101,7 +104,6 @@ if (!$canSubmit) {
             print_error ('nomoreattempts', 'codiana');
         }
 
-
         // creating path pieces
         $dataDir = get_config ('codiana', 'storagepath');
         $codianaID = sprintf ('task-%04d', $codiana->id);
@@ -111,6 +113,7 @@ if (!$canSubmit) {
 
         // grap codiana_get_file_transfer object
         $fileTransfer = codiana_get_file_transfer ();
+
 
         // delete old solution
         $fileTransfer->deleteDir ("$dataDir/$codianaID/$userID/curr/");
@@ -166,14 +169,23 @@ if (!$canSubmit) {
             true
         );
 
+        if ($warning) {
+            $lastAttempt->state = codiana_state::ABORTED;
+            $DB->update_record('codiana_attempt', $lastAttempt);
+        }
+
         // redirect user to view
         redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), "uploaded $newAttempt");
 
     } else {
         // show form
+
         echo $OUTPUT->header ();
         echo html_writer::tag ('h2', sprintf ('Attempt %d / %d', $totalAttempts + 1, $maxAttempts));
         $mform->display ($codiana, $cm, $course);
+
+        if ($warning)
+            echo html_writer::tag ('h4', get_string('codiana:abortedsolution:warning', 'codiana'));
     }
 
 
