@@ -79,10 +79,9 @@ class admin_setting_configmulticheckbox_base extends admin_setting_configmultich
         $result = 0;
         $i = $this->shift;
         foreach ($this->choices as $key => $unused) {
-            if (!empty($data[$key])) {
+            if (!empty($data[$key]))
                 $result += 1 << $i;
-                $i += $this->step;
-            }
+            $i += $this->step;
         }
         return $result;
     }
