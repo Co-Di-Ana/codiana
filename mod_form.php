@@ -83,6 +83,9 @@ class mod_codiana_mod_form extends moodleform_mod {
             // grade method
             $this->addTaskGradeMethodElement ();
 
+            // output method
+            $this->addTaskOutputMethodElement ();
+
             // allowed languages
             $this->addTaskLanguagesElement ();
 
@@ -225,17 +228,25 @@ class mod_codiana_mod_form extends moodleform_mod {
 
 
     private function addTaskGradeMethodElement () {
-        $gradeMethod = array (
-            '1' => get_string ('codiana:grademethod:strict', 'codiana'),
-            '2' => get_string ('codiana:grademethod:tolerant', 'codiana'),
-            '3' => get_string ('codiana:grademethod:vague', 'codiana')
-        );
+        $gradeMethod = codiana_get_strings_from_array (codiana_grade_method::$types);
         $this->mform->addElement ('select', 'grademethod', get_string ('codiana:grademethod', 'codiana'), $gradeMethod);
-        $this->mform->getElement ('grademethod')->setSelected ('2');
+        $this->mform->getElement ('grademethod')->setSelected (codiana_grade_method::SOLUTION_LAST);
         $this->mform->addRule ('grademethod', null, 'required', null, 'client');
         $this->mform->addRule ('grademethod', null, 'required', null, 'server');
         $this->mform->setType ('grademethod', PARAM_INT);
         $this->mform->addHelpButton ('grademethod', 'codiana:grademethod', 'codiana');
+    }
+
+
+
+    private function addTaskOutputMethodElement () {
+        $outputMethod = codiana_get_strings_from_array (codiana_output_method::$types);
+        $this->mform->addElement ('select', 'outputmethod', get_string ('codiana:outputmethod', 'codiana'), $outputMethod);
+        $this->mform->getElement ('outputmethod')->setSelected (codiana_output_method::GRADE_TOLERANT);
+        $this->mform->addRule ('outputmethod', null, 'required', null, 'client');
+        $this->mform->addRule ('outputmethod', null, 'required', null, 'server');
+        $this->mform->setType ('outputmethod', PARAM_INT);
+        $this->mform->addHelpButton ('outputmethod', 'codiana:outputmethod', 'codiana');
     }
 
 
@@ -422,24 +433,31 @@ class mod_codiana_mod_form extends moodleform_mod {
 
     private function addTaskSettings () {
         $this->settingIndex = 0;
-        $this->addTaskSettingBlock ('opensolver', codiana_display_options::OPEN_SOLVER);
-        $this->addTaskSettingBlock ('closesolver', codiana_display_options::CLOSE_SOLVER);
+        $this->addTaskSettingBlock ('opensolver', codiana_display_options::OPEN_SOLVER, array ('basestat', 'state'));
+        $this->addTaskSettingBlock ('closesolver', codiana_display_options::CLOSE_SOLVER, array ('basestat', 'state'));
         $this->addTaskSettingBlock ('openothers', codiana_display_options::OPEN_OTHERS);
         $this->addTaskSettingBlock ('closeothers', codiana_display_options::CLOSE_OTHERS);
     }
 
 
 
-    private function addTaskSettingBlock ($name, $shift) {
+    private function addTaskSettingBlock ($name, $shift, $disabled = array ()) {
         $group = array ();
         $i = 0;
+        $elem = null;
+        $alwasOn = false;
         foreach (codiana_display_options::$fields as $field) {
-            $group[] = $this->mform->createElement (
+            $alwasOn = in_array ($field, $disabled);
+            $group[] = $elem = $this->mform->createElement (
                 'advcheckbox',
-                "setting" . "[$this->settingIndex]", '', $field,
+                'setting' . "[$this->settingIndex]", '', $field,
                 array ('group' => $shift),
                 array (0, 1 << ($i + $shift)));
             $i += codiana_display_options::COUNT;
+
+            // dummy disabled
+            if ($alwasOn)
+                $this->mform->disabledIf ('setting' . "[$this->settingIndex]", 'difficulty', 'neq', 0);
             $this->settingIndex++;
         }
         $this->mform->addGroup ($group, $name, $name, '<br />', false);
@@ -468,8 +486,11 @@ class mod_codiana_mod_form extends moodleform_mod {
             $errors['mainfilename'] = 'regexp';
 
 
-        if (intval (@$codiana->grademethod) == 0)
+        if (in_array(@$codiana->grademethod, array_keys(codiana_grade_method::$types)) == false)
             $errors['grademethod'] = 'invalid value';
+
+        if (in_array(@$codiana->outputmethod, array_keys(codiana_output_method::$types)) == false)
+            $errors['outputmethod'] = 'invalid value';
 
 
         if (!is_array (@$codiana->languages))
@@ -485,8 +506,8 @@ class mod_codiana_mod_form extends moodleform_mod {
         }
 
 
-        if (intval (@$codiana->difficulty) == 0)
-            $errors['difficulty'] = 'not number';
+        if (in_array (@$codiana->difficulty, array (1, 2, 3, 4, 5)) == false)
+            $errors['difficulty'] = 'invalid value';
 
 
         if (intval (@$codiana->introeditor['format']) == 0)
