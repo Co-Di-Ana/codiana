@@ -36,18 +36,43 @@ class codiana_state {
     /** @var string */
     const PREFIX = 'codiana:state:';
 
+    const WAITINGTOPROCESS = 0;
+
+    const CORRECTSOLUTION = 1;
+
+    const WRONGSOLUTION = 2;
+
+    const MAXTIMELIMIT = 3;
+
+    const MAXMEMORYLIMIT = 4;
+
+    const COMPILATIONERROR = 5;
+
+    const RUNERROR = 6;
+
+    const LOOPERROR = 7;
+
+    const DANGEROUSCODE = 8;
+
+    const NOMAINCLASS = 9;
+
+    const ABORTED = 10;
+
+    const UNKWNOWNERROR = '?';
+
     private static $state = array (
-        '0' => 'waitingtoprocess',
-        '1' => 'correctsolution',
-        '2' => 'wrongsolution',
-        '3' => 'maxtimelimit',
-        '4' => 'maxmemorylimit',
-        '5' => 'compilationerror',
-        '6' => 'runerror',
-        '7' => 'looperror',
-        '8' => 'dangerouscode',
-        '9' => 'nomainclass',
-        '?' => 'unkwnownerror'
+        codiana_state::WAITINGTOPROCESS => 'waitingtoprocess',
+        codiana_state::CORRECTSOLUTION => 'correctsolution',
+        codiana_state::WRONGSOLUTION => 'wrongsolution',
+        codiana_state::MAXTIMELIMIT => 'maxtimelimit',
+        codiana_state::MAXMEMORYLIMIT => 'maxmemorylimit',
+        codiana_state::COMPILATIONERROR => 'compilationerror',
+        codiana_state::RUNERROR => 'runerror',
+        codiana_state::LOOPERROR => 'looperror',
+        codiana_state::DANGEROUSCODE => 'dangerouscode',
+        codiana_state::NOMAINCLASS => 'nomainclass',
+        codiana_state::ABORTED => 'aborted',
+        codiana_state::UNKWNOWNERROR => 'unkwnownerror'
     );
 
 
@@ -223,9 +248,10 @@ function codiana_solution_get_extension ($mform, $name) {
  */
 function codiana_get_file_transfer () {
     global $CFG;
-    require_once ($CFG->dirroot . '/mod/codiana/filelib.php');
+    include $CFG->dirroot . '/mod/codiana/filelib.php';
 
     $isLocal = get_config ('codiana', 'islocal');
+
     if ($isLocal)
         return new LocalFileTransfer();
 
@@ -364,7 +390,6 @@ function codiana_get_grade_attempts ($task) {
 
     $result = $DB->get_records_sql (
         "SELECT *
-
         FROM {codiana_attempt}
         WHERE taskid = :taskid
         GROUP BY userid
@@ -407,17 +432,31 @@ function codiana_is_task_open ($task) {
     return false;
 }
 
+/**
+ * @param $userid int user id
+ * @return bool if current user is also solver
+ */
 function codiana_is_task_solver ($userid) {
     global $USER;
     return $userid == $USER->id;
 }
 
+/**
+ * @param $isOpen bool whether is task in open state
+ * @param $isSolver bool wheter is current user solver
+ * @return int mask/shift if this task state, e.g. codiana_display_options::OPEN_SOLVER
+ */
 function codiana_get_task_state ($isOpen, $isSolver) {
     return $isOpen ?
         ($isSolver ? codiana_display_options::OPEN_SOLVER : codiana_display_options::OPEN_OTHERS) :
         ($isSolver ? codiana_display_options::CLOSE_SOLVER : codiana_display_options::CLOSE_OTHERS);
 }
 
+/**
+ * @param $task stdClass task
+ * @param $mask task state based on time and user
+ * @return array of allowed fields groups/fields
+ */
 function codiana_get_task_fields ($task, $mask) {
     $setting = $task->settings;
     $fields = array ();
@@ -430,6 +469,10 @@ function codiana_get_task_fields ($task, $mask) {
     return $fields;
 }
 
+/**
+ * @param $fields array field groups
+ * @return array expanded mysql fields
+ */
 function codiana_expand_fields ($fields) {
     $result = array ();
     foreach ($fields as $field) {
@@ -469,4 +512,26 @@ function codiana_expand_fields ($fields) {
         }
     }
     return $result;
+}
+
+/**
+ * @param $task
+ * @param $userID
+ * @return bool|int false if no attemps int representing last task state
+ */
+function codiana_get_last_attempt ($task, $userID) {
+    global $DB;
+    return $DB->get_record_sql (
+        "SELECT id,state
+        FROM
+              {codiana_attempt}
+        WHERE
+              (userid = :userid AND taskid = :taskid)
+        ORDER BY
+              ordinal DESC
+        LIMIT 1",
+        array ('userid' => $userID, 'taskid' => $task->id),
+        IGNORE_MISSING
+    );
+
 }
