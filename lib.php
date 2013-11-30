@@ -121,21 +121,19 @@ function codiana_preprocess (stdClass $codiana) {
     $codiana->name = codiana_parse_string (@$codiana->name);
     $codiana->mainfilename = codiana_parse_string (@$codiana->mainfilename);
     $codiana->grademethod = codiana_parse_int (@$codiana->grademethod, 0);
+    $codiana->outputmethod = codiana_parse_int (@$codiana->outputmethod, 0);
     $codiana->languages = implode (',', @$codiana->languages);
     $codiana->difficulty = codiana_parse_int (@$codiana->difficulty, 0);
     $codiana->intro = codiana_parse_string (@$codiana->intro, "");
     $codiana->introformat = codiana_parse_int (@$codiana->introformat, 0);
 
-
     $codiana->timeopen = codiana_parse_int (@$codiana->timeopen, null);
     $codiana->timeclose = codiana_parse_int (@$codiana->timeclose, null);
-
 
     $codiana->maxusers = codiana_parse_int (@$codiana->maxusers);
     $codiana->maxattempts = codiana_parse_int (@$codiana->maxattempts);
     $codiana->limittime = codiana_parse_int (@$codiana->limittime);
     $codiana->limitmemory = codiana_parse_int (@$codiana->limitmemory);
-
 
     $codiana->solutionfile = @$codiana->solutionfile;
     $codiana->inputfile = @$codiana->inputfile;

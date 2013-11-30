@@ -28,9 +28,13 @@
 
 defined ('MOODLE_INTERNAL') || die();
 
+/**
+ * Class codiana_state, helper class for task states
+ */
 class codiana_state {
 
-    private static $prefix = 'codiana:state:';
+    /** @var string */
+    const PREFIX = 'codiana:state:';
 
     private static $state = array (
         '0' => 'waitingtoprocess',
@@ -53,7 +57,7 @@ class codiana_state {
      * @return string state name
      */
     public static function get ($value) {
-        return get_string (codiana_state::$prefix .
+        return get_string (codiana_state::PREFIX .
                            (array_key_exists ($value, codiana_state::$state) ?
                                codiana_state::$state[$value] :
                                codiana_state::$state['?']
@@ -63,6 +67,10 @@ class codiana_state {
 
 
 
+/**
+ * Class codiana_display_options, helper class for display options values,
+ * State of task attampt
+ */
 class codiana_display_options {
 
     const OPEN_SOLVER = 0;
@@ -75,13 +83,64 @@ class codiana_display_options {
 
     const COUNT = 4;
 
+    /** @var array of all display quadrants */
     public static $types = array (
         codiana_display_options::OPEN_SOLVER,
         codiana_display_options::CLOSE_SOLVER,
         codiana_display_options::OPEN_OTHERS,
         codiana_display_options::CLOSE_OTHERS);
 
-    public static $fields = array ('username', 'state', 'runstat', 'resultstat', 'code');
+    /**
+     * @var array of all fields to edit
+     */
+    public static $fields = array ('basestat', 'state', 'runstat', 'resultstat', 'code');
+}
+
+
+
+/**
+ * Class codiana_grade_method, helper class for grade method values.
+ * Which solution choose as main for grading
+ */
+class codiana_grade_method {
+
+    const SOLUTION_FIRST = 0;
+
+    const SOLUTION_LAST = 1;
+
+    const SOLUTION_BEST = 2;
+
+//    const SOLUTION_MEAN = 3;
+
+    /** @var array of all grade methods */
+    public static $types = array (
+        codiana_grade_method::SOLUTION_FIRST => 'codiana:grademethod:first',
+        codiana_grade_method::SOLUTION_LAST => 'codiana:grademethod:last',
+        codiana_grade_method::SOLUTION_BEST => 'codiana:grademethod:best',
+//        codiana_grade_method::SOLUTION_MEAN => 'codiana:grademethod:mean'
+    );
+}
+
+
+
+/**
+ * Class codiana_output_method, helper class for output method values
+ * How to grade output
+ */
+class codiana_output_method {
+
+    const GRADE_STRICT = 0;
+
+    const GRADE_TOLERANT = 1;
+
+    const GRADE_VAGUE = 2;
+
+    /** @var array of all output methods */
+    public static $types = array (
+        codiana_output_method::GRADE_STRICT => 'codiana:outputmethod:strict',
+        codiana_output_method::GRADE_TOLERANT => 'codiana:outputmethod:tolerant',
+        codiana_output_method::GRADE_VAGUE => 'codiana:outputmethod:vague'
+    );
 }
 
 
@@ -177,7 +236,7 @@ function codiana_get_file_transfer () {
               'password' => get_config ('codiana', 'sshpassword'),
         )
     );
-    return new RemoteFileTransfer();
+    return $remote;
 }
 
 /**
@@ -221,18 +280,193 @@ function codiana_get_task_languages ($task) {
 /**
  * @param $task stdClass task object
  * @param $userID int user id
- * @return array of all supported languages in system
- * in array key is language extension, value is language name
+ * @param $order string valid order by expression (ORDER BY $order)
+ * @param $fields array which field will be selected
+ * @return array of all users attempts, id is key, value is attempt
  */
-function codiana_get_all_attempts ($task, $userID) {
+function codiana_get_all_attempts ($task, $userID, $fields = array (), $order = 'timesent DESC') {
     global $DB;
-    $result = $DB->get_records (
-        'codiana_attempt',
-        array (
-              'taskid' => $task->id,
-              'userid' => $userID
-        ),
-        'timesent DESC'
+    $fields = implode (",", $fields);
+    $result = $DB->get_records_sql (
+        "SELECT $fields
+        FROM {codiana_attempt} attempt
+        LEFT JOIN {user} user ON
+              (user.id = attempt.userid)
+        WHERE
+              (userid = :userid AND taskid = :taskid)
+        ORDER BY
+              $order",
+        array ('userid' => $userID, 'taskid' => $task->id),
+        IGNORE_MISSING
     );
+    return $result;
+}
+
+
+/**
+ * @param $task stdClass task object
+ * @param $userID id of a user to show attempt
+ * @param $fields array which field will be selected
+ * @return stdClass of result for given student having one or more attempt
+ * based on $task settitng, will return SOLUTION_LAST OR SOLUTION_FIRST or SOLUTION_BEST solutions
+ * @throws Exception when task is wrongly configured
+ */
+function codiana_get_grade_attempt ($task, $userID, $fields = array ()) {
+    global $DB;
+    $order =
+        ($task->grademethod == codiana_grade_method::SOLUTION_LAST ? 'timesent desc' :
+            ($task->grademethod == codiana_grade_method::SOLUTION_FIRST ? 'timesent asc' :
+                ($task->grademethod == codiana_grade_method::SOLUTION_BEST ? 'resultfinal desc' : NULL)
+            )
+        );
+
+    if (is_null ($order))
+        throw new Exception ('wrong task setting');
+
+    $fields = implode (",", $fields);
+
+    $result = $DB->get_record_sql (
+        "SELECT $fields
+        FROM
+              {codiana_attempt} attempt
+        LEFT JOIN {user} user ON
+              (user.id = attempt.userid)
+        WHERE
+              (userid = :userid AND taskid = :taskid)
+        ORDER BY
+              $order
+        LIMIT 1",
+        array ('userid' => $userID, 'taskid' => $task->id),
+        IGNORE_MISSING
+    );
+    return $result;
+}
+
+/**
+ * @param $task stdClass task object
+ * @return array of result for each student having one or more attempt one row
+ * based on $task settitng, will return SOLUTION_LAST OR SOLUTION_FIRST or SOLUTION_BEST solutions
+ * array where id is key, value is attempt
+ * @throws Exception when task is wrongly configured
+ */
+function codiana_get_grade_attempts ($task) {
+    global $DB;
+    $order =
+        ($task->grademethod == codiana_grade_method::SOLUTION_LAST ? 'timesent desc' :
+            ($task->grademethod == codiana_grade_method::SOLUTION_FIRST ? 'timesent asc' :
+                ($task->grademethod == codiana_grade_method::SOLUTION_BEST ? 'resultfinal desc' : NULL)
+            )
+        );
+
+    echo $order . "<br />";
+    if (is_null ($order))
+        throw new Exception ('wrong task setting');
+
+    $result = $DB->get_records_sql (
+        "SELECT *
+
+        FROM {codiana_attempt}
+        WHERE taskid = :taskid
+        GROUP BY userid
+        ORDER BY $order, resultfinal DESC",
+        array ('taskid' => $task->id),
+        IGNORE_MISSING
+    );
+    return $result;
+}
+
+/**
+ * @param $array array to translate
+ * @return array copy of array where values are 'get_string'ed
+ */
+function codiana_get_strings_from_array ($array) {
+    $result = array ();
+    foreach ($array as $key => $value)
+        $result[$key] = get_string ($value, 'codiana');
+    return $result;
+}
+
+
+function codiana_is_task_open ($task) {
+    $time = time ();
+    $open = $task->timeopen;
+    $close = $task->timeclose;
+
+    if (is_null ($open) && is_null ($close))
+        return true;
+
+    if (is_null ($open) && $time <= $close)
+        return true;
+
+    if (is_null ($close) && $time >= $open)
+        return true;
+
+    if ($time >= $open && $time <= $close)
+        return true;
+
+    return false;
+}
+
+function codiana_is_task_solver ($userid) {
+    global $USER;
+    return $userid == $USER->id;
+}
+
+function codiana_get_task_state ($isOpen, $isSolver) {
+    return $isOpen ?
+        ($isSolver ? codiana_display_options::OPEN_SOLVER : codiana_display_options::OPEN_OTHERS) :
+        ($isSolver ? codiana_display_options::CLOSE_SOLVER : codiana_display_options::CLOSE_OTHERS);
+}
+
+function codiana_get_task_fields ($task, $mask) {
+    $setting = $task->settings;
+    $fields = array ();
+    $i = $mask;
+    foreach (codiana_display_options::$fields as $field) {
+        if ($setting & (1 << $i))
+            $fields[] = $field;
+        $i += codiana_display_options::COUNT;
+    }
+    return $fields;
+}
+
+function codiana_expand_fields ($fields) {
+    $result = array ();
+    foreach ($fields as $field) {
+        switch ($field) {
+            case 'basestat':
+                $result['id'] = 'attempt.id';
+                $result['username'] = "CONCAT_WS (' ', UPPER(user.lastname), user.firstname) AS username";
+                $result['timesent'] = "attempt.timesent";
+                $result['ordinal'] = "attempt.ordinal";
+                break;
+            case 'runstat':
+                $result['runtime'] = 'attempt.runtime';
+                $result['runmemory'] = 'attempt.runmemory';
+                $result['runoutput'] = 'attempt.runoutput';
+                break;
+            case 'resultstat':
+                $result['resulttime'] = 'attempt.resulttime';
+                $result['resultmemory'] = 'attempt.resultmemory';
+                $result['resultoutput'] = 'attempt.resultoutput';
+                $result['resultfinal'] = 'attempt.resultfinal';
+                break;
+
+            case 'code':
+                $result['code'] = 'attempt.ordinal AS code';
+                $result['taskid'] = 'attempt.taskid';
+                $result['userid'] = 'attempt.userid';
+                break;
+
+            case 'state':
+                $result['state'] = 'state';
+                break;
+
+
+            default:
+                // ignore unknown fields
+                break;
+        }
+    }
     return $result;
 }
