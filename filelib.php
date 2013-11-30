@@ -105,7 +105,8 @@ class RemoteFileTransfer implements IFileTransfer {
         if ($result == false)
             fclose ($tmpFile);
 
-        $uri = stream_get_meta_data ($tmpFile)['uri'];
+        $info = stream_get_meta_data ($tmpFile);
+        $uri = $info['uri'];
         $result = ssh2_scp_send ($this->session, $uri, $path);
         fclose ($tmpFile);
 
@@ -121,7 +122,8 @@ class RemoteFileTransfer implements IFileTransfer {
         if ($tmpFile == false)
             throw new Exception ('Cannot create temp file');
 
-        $uri = stream_get_meta_data ($tmpFile)['uri'];
+        $info = stream_get_meta_data ($tmpFile);
+        $uri = $info['uri'];
         $result = ssh2_scp_recv ($this->session, $path, $uri);
         if ($result == false)
             throw new Exception ('Error recieving file from server');

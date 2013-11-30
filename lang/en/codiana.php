@@ -140,7 +140,11 @@ $string['codiana:state:runerror'] = 'Run error';
 $string['codiana:state:looperror'] = 'Solution looped';
 $string['codiana:state:dangerouscode'] = 'Dangerous code';
 $string['codiana:state:nomainclass'] = 'Cannot locate main class';
+$string['codiana:state:aborted'] = 'Solution processing aborted';
 $string['codiana:state:unkwnownerror'] = 'Unknown error';
+
+
+$string['codiana:abortedsolution:warning'] = 'Your previous attempt was not yet processed. By submitting new solution will abort your previous solution';
 
 
 // error

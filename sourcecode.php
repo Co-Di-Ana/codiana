@@ -102,4 +102,6 @@ $tmpFile = tmpfile ();
 fwrite ($tmpFile, $content);
 
 // finally, send file to user
-send_file (stream_get_meta_data ($tmpFile)['uri'], "$attemptName.zip");
+$info = stream_get_meta_data ($tmpFile);
+$uri = $info['uri'];
+send_file ($uri, "$attemptName.zip");
