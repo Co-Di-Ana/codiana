@@ -67,7 +67,7 @@ global $OUTPUT;
 // grap total attempts and max attempts
 $totalAttempts = $DB->count_records ('codiana_attempt', array ('userid' => $USER->id, 'taskid' => $codiana->id));
 $maxAttempts = $DB->get_field ('codiana', 'maxattempts', array ('id' => $codiana->id), MUST_EXIST);
-$canSubmit = $totalAttempts < $maxAttempts;
+$canSubmit = $totalAttempts < $maxAttempts || has_capability ('mod/codiana:manager', $context);
 $lastAttempt = codiana_get_last_attempt ($codiana, $USER->id);
 $warning = $totalAttempts > 0 && $lastAttempt->state == codiana_state::WAITINGTOPROCESS;
 
@@ -160,7 +160,7 @@ if (!$canSubmit) {
             'userid' => $USER->id,
             'attemptid' => $attemptID,
             'type' => 0, // solution
-            'priority' => has_capability ('mod/codiana:queueimportance', $context) ? 1 : 0
+            'priority' => has_capability ('mod/codiana:manager', $context) ? 1 : 0
         );
 
         $queueID = $DB->insert_record (
@@ -171,7 +171,7 @@ if (!$canSubmit) {
 
         if ($warning) {
             $lastAttempt->state = codiana_state::ABORTED;
-            $DB->update_record('codiana_attempt', $lastAttempt);
+            $DB->update_record ('codiana_attempt', $lastAttempt);
         }
 
         // redirect user to view
@@ -185,7 +185,7 @@ if (!$canSubmit) {
         $mform->display ($codiana, $cm, $course);
 
         if ($warning)
-            echo html_writer::tag ('h4', get_string('codiana:abortedsolution:warning', 'codiana'));
+            echo html_writer::tag ('h4', get_string ('codiana:abortedsolution:warning', 'codiana'));
     }
 
 

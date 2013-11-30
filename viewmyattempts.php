@@ -67,10 +67,18 @@ global $OUTPUT;
 
 //# ----- OUTPUT ----------------------------------------------------------------
 
-$fields = codiana_get_task_fields (
-    $codiana, codiana_is_task_open ($codiana) ?
-                codiana_display_options::OPEN_SOLVER :
-                codiana_display_options::CLOSE_SOLVER);
+
+
+// manager gets all fields
+if (has_capability ('mod/codiana:manager', $context)) {
+    $fields = codiana_display_options::$fields;
+} else {
+    $fields = codiana_get_task_fields (
+        $codiana, codiana_is_task_open ($codiana) ?
+        codiana_display_options::OPEN_SOLVER :
+        codiana_display_options::CLOSE_SOLVER);
+}
+
 $mysqlFields = codiana_expand_fields ($fields);
 // user do not need to see their own username
 unset ($mysqlFields['username']);
