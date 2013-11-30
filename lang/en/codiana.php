@@ -107,7 +107,7 @@ $string['codiana:section:files_help'] = 'Upload either solution or output';
 
 
 // view
-$string['codiana:view:mainfilename:warning'] = 'Submitted solution must contain startup file %s with correct extension (e.g. %s.java, %s.py)';
+$string['codiana:view:mainfilename:warning'] = 'Submitted solution must contain startup file %s with correct extension';
 
 
 // settings
