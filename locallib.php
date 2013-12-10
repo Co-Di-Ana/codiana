@@ -170,6 +170,17 @@ class codiana_output_method {
 
 
 
+class codiana_queue_type {
+
+    const SOLUTION_CHECK = 1;
+
+    const PROTO_CHECK = 2;
+
+    const PLAGIARISM_CHECK = 3;
+}
+
+
+
 /**
  * try to get $prop value from $codiana object and convert it to number
  * @param stdClass $codiana
@@ -247,7 +258,7 @@ function codiana_solution_get_extension ($mform, $name) {
  */
 function codiana_get_file_transfer () {
     global $CFG;
-    include $CFG->dirroot . '/mod/codiana/filelib.php';
+    require_once $CFG->dirroot . '/mod/codiana/filelib.php';
 
     $isLocal = get_config ('codiana', 'islocal');
 
@@ -296,7 +307,7 @@ function codiana_get_task_languages ($task) {
     $languages = array ();
     foreach ($result as $extension) {
         if (array_key_exists ($extension, $allLanguages))
-            $languages[$extension] = $allLanguages[$extension]->name;
+            $languages[$extension] = $allLanguages[$extension];
     }
 
     return $languages;
@@ -521,7 +532,7 @@ function codiana_expand_fields ($fields) {
 /**
  * @param $task
  * @param $userID
- * @return bool|int false if no attemps int representing last task state
+ * @return mixed|bool false if no attemps int representing last task state
  */
 function codiana_get_last_attempt ($task, $userID) {
     global $DB;
@@ -537,5 +548,307 @@ function codiana_get_last_attempt ($task, $userID) {
         array ('userid' => $userID, 'taskid' => $task->id),
         IGNORE_MISSING
     );
+}
 
+
+
+class codiana_file_path_type {
+
+    const TASK_INPUT = 1;
+
+    const TASK_OUTPUT = 2;
+
+    const TASK_DATA = 3;
+
+    const USER_SOLUTION = 5;
+
+    const USER_PREVIOUS_FOLDER = 6;
+
+    const USER_CURRENT_FOLDER = 7;
+
+    const USER_PREVIOUS_ZIP = 8;
+}
+
+
+
+class codiana_output_type {
+
+    const OUTPUT_FILE = 1;
+
+    const SOLUTION = 2;
+}
+
+
+
+function codiana_get_task_file_path ($task, $type) {
+    $dataDir = get_config ('codiana', 'storagepath');
+    $codianaID = sprintf ('task-%04d', $task->id);
+    $mainfilename = $task->mainfilename;
+    switch ($type) {
+        case codiana_file_path_type::TASK_INPUT:
+            return $dataDir . "$codianaID/data/$mainfilename.in";
+        case codiana_file_path_type::TASK_OUTPUT:
+            return $dataDir . "$codianaID/data/$mainfilename.out";
+        case codiana_file_path_type::TASK_DATA:
+            return $dataDir . "$codianaID/data/";
+    }
+}
+
+function codiana_get_user_file_path ($task, $type, $id, $detail = null) {
+    $dataDir = get_config ('codiana', 'storagepath');
+    $codianaID = sprintf ('task-%04d', $task->id);
+    $userID = sprintf ('user-%04d', $id);
+    $mainfilename = $task->mainfilename;
+
+    switch ($type) {
+        case codiana_file_path_type::USER_SOLUTION:
+            return $dataDir . "$codianaID/$userID/curr/$mainfilename.$detail";
+        case codiana_file_path_type::USER_PREVIOUS_FOLDER:
+            return $dataDir . "$codianaID/$userID/prev/";
+        case codiana_file_path_type::USER_CURRENT_FOLDER:
+            return $dataDir . "$codianaID/$userID/curr/";
+        case codiana_file_path_type::USER_PREVIOUS_ZIP:
+            $attempt = sprintf ('attempt-%04d.zip', $detail);
+            return $dataDir . "$codianaID/$userID/prev/$attempt";
+    }
+}
+
+function codiana_get_files_status ($task) {
+    $result = array ();
+    $transfer = codiana_get_file_transfer ();
+    $result['input'] = $transfer->exists (codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT));
+    $result['output'] = $transfer->exists (codiana_get_task_file_path ($task, codiana_file_path_type::TASK_OUTPUT));
+    return $result;
+}
+
+
+
+function codiana_save_user_solution ($task, $userID, $mform, $data) {
+    global $DB;
+
+    // process details
+    $data = is_object ($data) ? $data : (object)$data;
+
+    // mform constanst
+    $content = $mform->get_file_content ($data->elementName);
+    $extension = $mform->extension;
+    $defaultExtension = $mform->defaultExtension;
+
+    // generate paths
+    $currentFolder = codiana_get_user_file_path ($task, codiana_file_path_type::USER_CURRENT_FOLDER, $userID);
+    $previousFolder = codiana_get_user_file_path ($task, codiana_file_path_type::USER_PREVIOUS_FOLDER, $userID);
+    $solutionFile = codiana_get_user_file_path ($task, codiana_file_path_type::USER_SOLUTION, $userID, $defaultExtension);
+    $zippedFile = codiana_get_user_file_path ($task, codiana_file_path_type::USER_PREVIOUS_ZIP, $userID, $data->attempt);
+
+    // grap codiana_get_file_transfer object
+    $fileTransfer = codiana_get_file_transfer ();
+
+    // delete old solution and recreate folder
+    if (!$fileTransfer->deleteDir ($currentFolder) && $fileTransfer->exists ($currentFolder))
+        throw new moodle_exception ('codiana:error:cannotdeletefolder', 'codiana');
+    if ((!$fileTransfer->mkDir ($currentFolder) && !$fileTransfer->exists ($currentFolder)) ||
+        (!$fileTransfer->mkDir ($previousFolder) && !$fileTransfer->exists ($previousFolder))
+    ) {
+        throw new moodle_exception ('codiana:error:cannotcreatefolder', 'codiana');
+    }
+
+    // save new solution
+    if (!$fileTransfer->saveFile ($content, $solutionFile))
+        throw new moodle_exception ('codiana:error:cannotsavesolution', 'codiana');
+
+    // if zipped solution, unzip to location and delete zip file
+    if ($defaultExtension == 'zip') {
+        if (!$fileTransfer->unzip ($solutionFile, $currentFolder))
+            throw new moodle_exception ('codiana:error:cannotunzipsolution', 'codiana');
+        if (!$fileTransfer->deleteFile ($solutionFile))
+            throw new moodle_exception ('codiana:error:cannotdeletesolution', 'codiana');
+    }
+
+    // zip solution
+    if (!$fileTransfer->zipDir ($currentFolder, $zippedFile))
+        throw new moodle_exception ('codiana:error:cannotzipsolution', 'codiana');
+
+    // TODO use codiana_is_zip comparison, not == 'zip'
+    $attempt = array (
+        'taskid' => $task->id,
+        'userid' => $userID,
+        'timesent' => time (),
+        'state' => codiana_state::WAITINGTOPROCESS,
+        'language' => $extension,
+        'detail' => $defaultExtension == 'zip' ? 1 : 0,
+        'ordinal' => $data->attempt
+    );
+
+    $attemptID = $DB->insert_record (
+        'codiana_attempt',
+        (object)$attempt,
+        true
+    );
+
+    $queue = array (
+        'taskid' => $task->id,
+        'userid' => $userID,
+        'attemptid' => $attemptID,
+        'type' => $data->type,
+        'priority' => $data->priority
+    );
+
+    $queueID = $DB->insert_record (
+        'codiana_queue',
+        (object)$queue,
+        true
+    );
+
+    return true;
+}
+
+function codiana_save_proto_solution ($task, $mform) {
+    global $USER, $DB;
+
+    $result = array ();
+    $totalAttempts = $DB->count_records ('codiana_attempt', array ('userid' => $USER->id, 'taskid' => $task->id));
+    $lastAttempt = codiana_get_last_attempt ($task, $USER->id);
+    $warning = $totalAttempts > 0 && $lastAttempt->state == codiana_state::WAITINGTOPROCESS;
+
+    if ($warning) {
+        // set state to aborted (last attempt) and delete any users queue items
+        $lastAttempt->state = codiana_state::ABORTED;
+        $DB->update_record ('codiana_attempt', $lastAttempt);
+        $DB->delete_records ('codiana_queue', array ('userid' => $USER->id));
+    }
+
+
+    // save solution
+    $data = array (
+        'priority' => 100,
+        'elementName' => 'outputorsolutionfile',
+        'attempt' => $totalAttempts + 1,
+        'type' => codiana_queue_type::PROTO_CHECK
+    );
+
+
+    if (codiana_save_user_solution ($task, $USER->id, $mform, $data))
+        $result[] = codiana_message::create ('protoinsertedintoqueue', 'info');
+    else
+        $result[] = codiana_message::create ('errorinsertingintoqueue', 'error');
+
+    return $result;
+}
+
+function codiana_save_input_file ($task, $mform) {
+    $result = array ();
+
+    // define paths
+    $inputPath = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT);
+    $data = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_DATA);
+
+    // grab file transfer
+    $files = codiana_get_file_transfer ();
+    $files->mkDir ($data);
+
+    //delete previous file
+    $success = $files->deleteFile ($inputPath);
+
+    // deletion error
+    if (!$success && $files->exists ($inputPath)) {
+        $result[] = codiana_message::create ('cannotdeleteinputfile', 'error');
+    } else {
+        $content = $mform->get_file_content ('inputfile');
+        $success = $files->saveFile ($content, $inputPath);
+
+        if (!$success && !$files->exists ($inputPath))
+            $result[] = codiana_message::create ('cannotcreateinputfile', 'error');
+        else
+            $result[] = codiana_message::create ('inputsaved', 'info');
+    }
+    return $result;
+}
+
+function codiana_save_output_file ($task, $mform) {
+    $result = array ();
+
+    // define paths
+    $files = codiana_get_file_transfer ();
+    $outputPath = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_OUTPUT);
+
+    //delete previous file
+    $success = $files->deleteFile ($outputPath);
+
+    // deletion error
+    if (!$success && $files->exists ($outputPath)) {
+        $result[] = codiana_message::create ('cannotdeleteoutputfile', 'error');
+    } else {
+        $content = $mform->get_file_content ('outputorsolutionfile');
+        $success = $files->saveFile ($content, $outputPath);
+
+        if (!$success && !$files->exists ($outputPath))
+            $result[] = codiana_message::create ('cannotcreateoutputfile', 'error');
+        else
+            $result[] = codiana_message::create ('outputsaved', 'info');
+    }
+    return $result;
+}
+
+
+class codiana_message {
+
+    /** @var string */
+    public $content;
+
+    /** @var array */
+    public $attributes;
+
+
+
+    /**
+     * @param $content string
+     * @param null $class string
+     */
+    public function __construct ($content, $class = null) {
+        $this->attributes = is_null ($class) ? array () : array ('class' => $class);
+        $this->content = $content;
+    }
+
+
+
+    /**
+     * Render message
+     * @return string li element
+     */
+    public function render () {
+        return html_writer::tag ('li', $this->content, $this->attributes);
+    }
+
+
+
+    /**
+     * Renders all items in array, if empty and $emptyItem is set, render only $emptyItem
+     * @param $items array of codiana_message
+     * @param null $emptyItem codiana_message
+     * @param string $tag list start tag (ul/ol)
+     * @return string html
+     */
+    public static function renderItems ($items, $emptyItem = null, $tag = 'ul') {
+        $html = '';
+        $html .= html_writer::start_tag ($tag);
+        foreach ($items as $item)
+            $html .= $item->render ();
+
+        if (empty ($items) && !is_null ($emptyItem))
+            $html .= $emptyItem->render ();
+        $html .= html_writer::end_tag ($tag);
+        return $html;
+    }
+
+
+
+    /**
+     * @param $id string get_string id
+     * @param null $class attribute class name
+     * @param string $component get_string component
+     * @return codiana_message
+     */
+    public static function create ($id, $class = null, $component = 'codiana') {
+        return new codiana_message(get_string ('codiana:message:' . $id, $component), $class);
+    }
 }
