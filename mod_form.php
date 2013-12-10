@@ -133,28 +133,6 @@ class mod_codiana_mod_form extends moodleform_mod {
 
 
 
-
-        // -----------------------------------------------------------------------------
-        // ----- FILES -----------------------------------------------------------------
-        // -----------------------------------------------------------------------------
-        $this->mform->addElement ('header', 'taskfiles', get_string ('codiana:section:files', 'codiana'));
-        $this->mform->addHelpButton ('taskfiles', 'codiana:section:files', 'codiana');
-        $this->mform->setExpanded ('taskfiles');
-        {
-            // task solution file
-            $this->addTaskSolutionFileElement ();
-
-            // task input file
-            $this->addTaskInputFileElement ();
-
-            // task output file
-            $this->addTaskOutputFileElement ();
-
-            // task error file
-            $this->addTaskErrorFileElement ();
-        }
-
-
         // -----------------------------------------------------------------------------
         // ----- I/O EXAMPLES ----------------------------------------------------------
         // -----------------------------------------------------------------------------
@@ -370,47 +348,6 @@ class mod_codiana_mod_form extends moodleform_mod {
         $this->mform->setType ('limitmemoryfalling', PARAM_INT);
         $this->mform->setType ('limitmemorynothing', PARAM_INT);
         $this->mform->addHelpButton ('limitmemory_group', 'codiana:limitmemory', 'codiana');
-    }
-
-
-
-    private function addTaskFileElement ($fileTypeName, $required) {
-        global $CFG;
-        $this->mform->addElement (
-            'filepicker',
-            $fileTypeName,
-            get_string ("codiana:$fileTypeName", 'codiana'),
-            null,
-            array ('maxbytes' => $CFG->maxbytes,
-                   'accepted_types' => '*'));
-        if ($required)
-            $this->mform->addRule ($fileTypeName, "you must specify atleast one file", 'required', null, 'client');
-        $this->mform->setType ($fileTypeName, PARAM_RAW);
-        $this->mform->addHelpButton ($fileTypeName, "codiana:$fileTypeName", 'codiana');
-    }
-
-
-
-    private function addTaskSolutionFileElement () {
-        $this->addTaskFileElement ('solutionfile', false);
-    }
-
-
-
-    private function addTaskInputFileElement () {
-        $this->addTaskFileElement ('inputfile', false);
-    }
-
-
-
-    private function addTaskOutputFileElement () {
-        $this->addTaskFileElement ('outputfile', false);
-    }
-
-
-
-    private function addTaskErrorFileElement () {
-        $this->addTaskFileElement ('errorfile', false);
     }
 
 
