@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'codiana';
 $string['modulenameplural'] = 'codiana';
-$string['modulename_help'] = 'Use the codiana module for... | The codiana module allows...';
+$string['modulename_help'] = 'Use the codiana module for code diagnosis.';
 $string['codiananame'] = 'codiana name';
 $string['codiananame_help'] = 'This is the content of the help tooltip associated with the codiananame field. Markdown syntax is supported.';
 $string['codiana'] = 'codiana';
@@ -61,12 +61,14 @@ $string['codiana:limitmemory'] = 'Memory limit';
 $string['codiana:solutionfile'] = 'Solution file';
 $string['codiana:inputfile'] = 'Input file';
 $string['codiana:outputfile'] = 'Output file';
-$string['codiana:errorfile'] = 'Error file';
 $string['codiana:inputexample'] = 'Input example';
 $string['codiana:outputexample'] = 'Output example';
+$string['codiana:measurevalues'] = 'Measure values';
 
 $string['codiana:sourcefile'] = 'Solution';
 $string['codiana:solutionlanguage'] = 'Solution language';
+
+$string['codiana:outputorsolutionfile'] = 'Output file or solution file';
 
 // edit form help
 $string['codiana:name_help'] = 'Task name help';
@@ -84,14 +86,14 @@ $string['codiana:limitmemory_help'] = 'Task memory limit';
 $string['codiana:solutionfile_help'] = 'Solution file help';
 $string['codiana:inputfile_help'] = 'Input file help';
 $string['codiana:outputfile_help'] = 'Output file help';
-$string['codiana:errorfile_help'] = 'Error file help';
 $string['codiana:inputexample_help'] = 'Input help';
 $string['codiana:outputexample_help'] = 'Output help';
-
+$string['codiana:measurevalues_help'] = 'If checked, system will automatically measure time and memory values, and will generate output file.';
 
 $string['codiana:sourcefile_help'] = 'Solution help';
-$string['codiana:solutionlanguage_help'] = 'Specify solution language';
+$string['codiana:solutionlanguage_help'] = 'Specify main file extension if zipped';
 
+$string['codiana:outputorsolutionfile_help'] = 'Output file help';
 
 
 // mod_form sections
@@ -101,8 +103,11 @@ $string['codiana:section:limits'] = 'Limits';
 $string['codiana:section:files'] = 'Files';
 $string['codiana:section:examples'] = 'I/O examples';
 $string['codiana:section:results'] = 'View options';
+$string['codiana:section:inputfilesection'] = 'Input file';
+$string['codiana:section:outputfilesection'] = 'Output file or solution';
 
-$string['codiana:section:files_help'] = 'Upload either solution or output';
+$string['codiana:section:inputfilesection_help'] = 'You MUST specify or generate input file.';
+$string['codiana:section:outputfilesection_help'] = 'You MUST specify or let the system generate output file';
 
 
 
@@ -150,3 +155,37 @@ $string['codiana:abortedsolution:warning'] = 'Your previous attempt was not yet 
 // error
 $string['codiana:error:youcannotdownloadthissolution'] = "You don't have sufficient permissions to download this file!";
 $string['codiana:error:filedoesnotexists'] = "File you're looking for does't exists!";
+
+
+// capabilities
+$string['codiana:addinstance'] = 'Add a new codiana';
+$string['codiana:createinputfile'] = 'Upload input file';
+$string['codiana:manager'] = 'Have higher permissions';
+$string['codiana:managetaskfiles'] = 'Manage task files';
+$string['codiana:submitprotosolution'] = 'Submit prototype solution';
+$string['codiana:submitsolution'] = 'Submit solution';
+$string['codiana:viewmyattempts'] = 'View ones attempts';
+$string['codiana:viewresults'] = 'View all results';
+
+
+
+
+$string['codiana:managefiles:outputorsolution'] = 'Output file or solution';
+$string['codiana:managefiles:output'] = 'Output file';
+$string['codiana:managefiles:solution'] = 'Solution';
+
+
+$string['codiana:message:protoinsertedintoqueue'] = 'Solution inserted into queue, measured values will be autimatically in task setting criteria';
+$string['codiana:message:errorinsertingintoqueue'] = 'Error inserting into queue';
+$string['codiana:message:noactionperformed'] = 'No action performed!';
+$string['codiana:message:cannotdeleteinputfile'] = 'Cannot delete input file';
+$string['codiana:message:cannotcreateinputfile'] = 'Cannot create input file';
+$string['codiana:message:inputsaved'] = 'Input file was successfully saved';
+$string['codiana:message:inputgenerated'] = 'Input file was successfully generated';
+$string['codiana:message:errorgeneratinginput'] = 'Error while generating input file';
+$string['codiana:message:cannotdeleteoutputfile'] = 'Cannot delete output file';
+$string['codiana:message:cannotcreateoutputfile'] = 'Cannot create output file';
+$string['codiana:message:outputsaved'] = 'Output file was successfully saved';
+
+
+
