@@ -2,35 +2,86 @@
 
 interface IFileTransfer {
 
+    /**
+     * @param $content
+     * @param $path
+     * @return bool true on success, false on error
+     */
     public function saveFile ($content, $path);
 
 
 
+    /**
+     * @param $path
+     * @return bool|string false on failure, content on success
+     */
     public function loadFile ($path);
 
 
 
+    /**
+     * Delete given FILE
+     * @param $path
+     * @return bool true on success, false on error
+     */
     public function deleteFile ($path);
 
 
 
+    /**
+     * Delete given FOLDER
+     * @param $location
+     * @return bool true on success, false on error
+     */
     public function deleteDir ($location);
 
 
 
+    /**
+     * Creates folder(s recursively)
+     * @param $location
+     * @return bool true on success, false on error
+     */
     public function mkDir ($location);
 
 
 
+    /**
+     * Zip given $dirLocation to $zipLocation
+     * @param $dirLocation
+     * @param $zipLocation
+     * @return bool true on success, false on error
+     */
     public function zipDir ($dirLocation, $zipLocation);
 
 
 
+    /**
+     * Unzip given $zipLocation to given $dirLocation
+     * @param $zipLocation
+     * @param $dirLocation
+     * @return bool true on success, false on error
+     */
     public function unzip ($zipLocation, $dirLocation);
 
 
 
+    /**
+     * Returns whether folder/file exists
+     * @param $location
+     * @return bool true on success, false on error
+     */
+    public function exists ($location);
+
+
+
+    /**
+     * Set additional configuration
+     * @param $object
+     * @return mixed
+     */
     public function setConfig ($object);
+
 }
 
 
@@ -177,6 +228,12 @@ class RemoteFileTransfer implements IFileTransfer {
 
 
 
+    public function exists ($location) {
+        // TODO: Implement fileExists() method.
+    }
+
+
+
     public function setConfig ($object) {
         if (!is_object ($object))
             $object = (object)$object;
@@ -199,15 +256,13 @@ class LocalFileTransfer implements IFileTransfer {
 
 
     public function loadFile ($path) {
-        if (!file_exists($path))
-            throw new moodle_exception ('codiana:error:filedoesnotexists', 'codiana');
         return file_get_contents ($path, FILE_BINARY);
     }
 
 
 
     public function deleteFile ($path) {
-        return unlink ($path);
+        return @unlink ($path);
     }
 
 
@@ -286,6 +341,12 @@ class LocalFileTransfer implements IFileTransfer {
 
     public function setConfig ($object) {
         // ignore for now
+    }
+
+
+
+    public function exists ($location) {
+        return file_exists ($location);
     }
 
 }
