@@ -93,7 +93,7 @@ if (!$canSubmit) {
 
 
         // file extension support check
-        $error = $mform->validate_solution_file ($codiana);
+        $error = $mform->validate_solution_file ();
         if ($error != null) {
             redirect ($url, sprintf ($error, $mform->extension));
             die();
@@ -104,78 +104,26 @@ if (!$canSubmit) {
             print_error ('nomoreattempts', 'codiana');
         }
 
-        // creating path pieces
-        $dataDir = get_config ('codiana', 'storagepath');
-        $codianaID = sprintf ('task-%04d', $codiana->id);
-        $userID = sprintf ('user-%05d', $USER->id);
-        $newAttempt = sprintf ('attempt-%03d', $totalAttempts + 1);
-        $mainfilename = $codiana->mainfilename;
-
-        // grap codiana_get_file_transfer object
-        $fileTransfer = codiana_get_file_transfer ();
-
-
-        // delete old solution
-        $fileTransfer->deleteDir ("$dataDir/$codianaID/$userID/curr/");
-        $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/curr/");
-
-        // save new solution
-        $fileTransfer->saveFile ($mform->get_file_content ('sourcefile'),
-                                 "$dataDir/$codianaID/$userID/curr/$mainfilename.$mform->defaultExtension");
-
-        // if zipped solution, unzip to location and remove zip file
-        if ($mform->defaultExtension == 'zip') {
-            $fileTransfer->unzip ("$dataDir/$codianaID/$userID/curr/$mainfilename.$mform->defaultExtension",
-                                  "$dataDir/$codianaID/$userID/curr/");
-            $fileTransfer->deleteFile ("$dataDir/$codianaID/$userID/curr/$mainfilename.$mform->defaultExtension");
-        }
-
-        // zip solution
-        $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/curr/");
-        $fileTransfer->mkDir ("$dataDir/$codianaID/$userID/prev/");
-        $fileTransfer->zipDir ("$dataDir/$codianaID/$userID/curr/",
-                               "$dataDir/$codianaID/$userID/prev/$newAttempt.zip");
-
-        // TODO use is_zip comparison, not == 'zip'
-        $attempt = array (
-            'taskid' => $codiana->id,
-            'userid' => $USER->id,
-            'timesent' => time (),
-            'state' => 0,
-            'language' => $mform->extension,
-            'detail' => $mform->defaultExtension == 'zip' ? 1 : 0,
-            'ordinal' => $totalAttempts + 1
+        // save solution
+        $data = array (
+            'priority' => has_capability ('mod/codiana:manager', $context) ? 100 : 0,
+            'elementName' => 'sourcefile',
+            'attempt' => $totalAttempts + 1,
+            'type' => codiana_queue_type::SOLUTION_CHECK
         );
+        codiana_save_user_solution ($codiana, $USER->id, $mform, $data);
 
-        $attemptID = $DB->insert_record (
-            'codiana_attempt',
-            (object)$attempt,
-            true
-        );
-
-
-
-        $queue = array (
-            'taskid' => $codiana->id,
-            'userid' => $USER->id,
-            'attemptid' => $attemptID,
-            'type' => 0, // solution
-            'priority' => has_capability ('mod/codiana:manager', $context) ? 1 : 0
-        );
-
-        $queueID = $DB->insert_record (
-            'codiana_queue',
-            (object)$queue,
-            true
-        );
 
         if ($warning) {
+            // set state to aborted (last attempt) and delete any users queue items
             $lastAttempt->state = codiana_state::ABORTED;
             $DB->update_record ('codiana_attempt', $lastAttempt);
+            $DB->delete_records('codiana_queue', array ('userid' => $USER->id));
         }
 
         // redirect user to view
-        redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), "uploaded $newAttempt");
+        $newAttemptNo = $totalAttempts + 1;
+        redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), "Uploaded $newAttemptNo. attempt");
 
     } else {
         // show form

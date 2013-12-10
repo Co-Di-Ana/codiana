@@ -25,6 +25,7 @@
 
 
 defined ('MOODLE_INTERNAL') || die();
+require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 
 
 class mod_codiana_renderer extends plugin_renderer_base {
