@@ -1,0 +1,126 @@
+<div id="generate-input">
+    <div class="generalbox">
+        <div class="left-box">
+            <h1>Structure</h1>
+
+            <div id="generator-items">
+            </div>
+        </div>
+        <div class="right-box">
+
+            <form name="edit-string" id="edit-string" action="#" method="POST" onsubmit="return false;">
+                <fieldset>
+                    <legend>Edit string constant</legend>
+
+                    <label for="edit-string-id">String</label>
+                    <input id="edit-string-id" name="id" type="text" value="string"/>
+                </fieldset>
+                <fieldset>
+                    <button name="generator-edit-element">Edit element</button>
+                    <button name="generator-new-element">Add element</button>
+                    <button name="generator-copy-element">Copy element</button>
+                    <button name="generator-delete-element">Delete element</button>
+                </fieldset>
+            </form>
+
+
+            <form name="edit-variable-step" id="edit-variable-step" action="#" method="POST" onsubmit="return false;">
+                <fieldset>
+                    <legend>Edit variable with step increase</legend>
+
+                    <label for="edit-variable-step-id">Id</label>
+                    <input id="edit-variable-step-id" name="id" type="text" value="variable"/>
+
+                    <label for="edit-variable-step-start">Start</label>
+                    <input id="edit-variable-step-start" name="start" type="text" value="1"/>
+
+                    <label for="edit-variable-step-stepl">Step</label>
+                    <input id="edit-variable-step-stepl" name="step" type="text" value="1"/>
+
+                    <label for="edit-variable-step-format">Format</label>
+                    <input id="edit-variable-step-format" name="format" type="text" value="%d"/>
+                </fieldset>
+                <fieldset>
+                    <button name="generator-edit-element">Edit element</button>
+                    <button name="generator-new-element">Add element</button>
+                    <button name="generator-copy-element">Copy element</button>
+                    <button name="generator-delete-element">Delete element</button>
+                </fieldset>
+            </form>
+
+
+            <form name="edit-variable-random" id="edit-variable-random" action="#" method="POST"
+                  onsubmit="return false;">
+                <fieldset>
+                    <legend>Edit variable random value</legend>
+
+                    <label for="edit-variable-random-id">Id</label>
+                    <input id="edit-variable-random-id" name="id" type="text" value="variable"/>
+
+                    <label for="edit-variable-random-min">Min</label>
+                    <input id="edit-variable-random-min" name="min" type="text" value="1"/>
+
+                    <label for="edit-variable-random-max">Max</label>
+                    <input id="edit-variable-random-max" name="max" type="text" value="100"/>
+
+                    <label for="edit-variable-random-format">Format</label>
+                    <input id="edit-variable-random-format" name="format" type="text" value="%d"/>
+                </fieldset>
+                <fieldset>
+                    <button name="generator-edit-element">Edit element</button>
+                    <button name="generator-new-element">Add element</button>
+                    <button name="generator-copy-element">Copy element</button>
+                    <button name="generator-delete-element">Delete element</button>
+                </fieldset>
+            </form>
+
+
+            <form name="edit-section" id="edit-section" action="#" method="POST" onsubmit="return false;">
+                <fieldset>
+                    <legend>Edit section</legend>
+
+                    <label for="edit-section-id">Id</label>
+                    <input id="edit-section-id" name="id" type="text" value="section"/>
+
+                    <label for="edit-section-count">Count</label>
+                    <input id="edit-section-count" name="count" type="text" value="1"/>
+                </fieldset>
+                <fieldset>
+                    <button name="generator-edit-element">Edit element</button>
+                    <button name="generator-new-element">Add element</button>
+                    <button name="generator-copy-element">Copy element</button>
+                    <button name="generator-delete-element">Delete element</button>
+                </fieldset>
+            </form>
+
+            <form name="edit-new-line" id="edit-new-line" action="#" method="POST" onsubmit="return false;">
+                <fieldset>
+                    <button name="generator-new-element">Add element</button>
+                    <button name="generator-copy-element">Copy element</button>
+                    <button name="generator-delete-element">Delete element</button>
+                </fieldset>
+            </form>
+
+            <form name="new-element" id="new-element" action="#" method="POST" onsubmit="return false;">
+                <fieldset class="radio">
+                    <label><input type="radio" name="new-element-group" value="string">String</label>
+                    <label><input type="radio" name="new-element-group" value="variable-step">Step variable</label>
+                    <label><input type="radio" name="new-element-group" value="variable-random">Random variable</label>
+                    <label><input type="radio" name="new-element-group" value="section">Section</label>
+                    <label><input type="radio" name="new-element-group" value="new-line">New line</label>
+                </fieldset>
+            </form>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+    <div class="generalbox">
+        <h1>Input</h1>
+
+        <div class="codiana_code_example">
+            <ol id="generator-value">
+
+            </ol>
+        </div>
+    </div>
+</div>

@@ -200,7 +200,6 @@ class mod_codiana_managefiles_form extends mod_codiana_solution_file_form {
 
 
         $this->add_action_buttons (true);
-
     }
 
 
@@ -234,7 +233,7 @@ class mod_codiana_managefiles_form extends mod_codiana_solution_file_form {
 
         if ($this->files->output)
             $this->addHTML ('By submitting output file, you will override existing output file!', 'warning');
-         else
+        else
             $this->addHTML ('You need to submit output file in order to be able activate task!', 'error');
     }
 
@@ -302,5 +301,53 @@ class mod_codiana_managefiles_form extends mod_codiana_solution_file_form {
         }
 
         return $messages;
+    }
+}
+
+
+
+class mod_codiana_generate_input extends moodleform {
+
+    /** @var stdClass */
+    private $codiana;
+
+    /** @var MoodleQuickForm */
+    private $mform;
+
+
+
+    public function __construct ($codiana, $action = null, $customdata = null, $method = 'post', $target = '', $attributes = null, $editable = true) {
+        $this->codiana = $codiana;
+        parent::__construct ($action, $customdata, $method, $target, $attributes, $editable);
+    }
+
+
+
+    protected function definition () {
+        global $CFG, $DB;
+        $this->mform = $this->_form;
+
+        $this->mform->addElement ('hidden', 'generateinput', '', array ('id' => 'id_generateinput'));
+        $this->mform->setType ('generateinput', PARAM_RAW);
+        $this->mform->addRule ('generateinput', null, 'required', null, 'client');
+        $this->mform->addRule ('generateinput', null, 'required', null, 'server');
+
+        $this->add_action_buttons ();
+    }
+
+
+
+    public function validation ($data, $files) {
+        global $CFG;
+        $errors = parent::validation ($data, $files);
+        require_once ($CFG->dirroot . '/mod/codiana/generateinputlib.php');
+        $object = (object)$data;
+        $object->generateinput = '"csa';
+
+        $result = generator_parser::create ($object->generateinput);
+        if ($result == false)
+            $errors['generateinput'] = 'wrong value';
+
+        return $errors;
     }
 }

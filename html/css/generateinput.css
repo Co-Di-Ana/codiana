@@ -1,0 +1,78 @@
+/*form fieldset label:after {*/
+/*content: 'br';*/
+/*display: block;*/
+/*}*/
+
+#generate-input form fieldset label {
+    clear: both;
+    display: inline-block;
+    margin-right: 20px;
+}
+
+#generate-input form fieldset input {
+    display: block;
+    text-align: left;
+}
+
+#generate-input form .radio label {
+    display: block;
+    float: none;
+    width: 180px;
+}
+
+#generate-input form .radio input {
+    display: inline-block;
+    float: none;
+}
+
+#generator-items a, #generator-items span {
+    display: inline-block;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #000000;
+    padding: 1px 3px;
+    margin: 5px 5px;
+    white-space: pre;
+    font-family: Consolas, "Courier New", Courier, monospace;
+}
+
+#generator-items .selectedItem {
+    color: #FFFFFF;
+    background-color: #ff0000;
+}
+
+#generator-items .selectedSection {
+    color: #FFFFFF;
+    background-color: #008800;
+}
+
+#generator-items li {
+    list-style: none;
+}
+
+#generator-items ul {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+#generate-input .generalbox input {
+    font-family: Consolas, "Courier New", Courier, monospace;
+}
+
+#generate-input .generalbox {
+    clear: both;
+}
+
+#generate-input .generalbox .left-box {
+    float: left;
+    display: inline-block;
+    width: 75%;
+    box-sizing: border-box;
+}
+
+#generate-input .generalbox .right-box {
+    float: right;
+    display: inline;
+    width: 25%;
+    box-sizing: border-box;
+}
