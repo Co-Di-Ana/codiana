@@ -789,6 +789,29 @@ function codiana_save_output_file ($task, $mform) {
     return $result;
 }
 
+function codiana_generate_input ($task) {
+    $tmpFile = tmpfile ();
+    $info = stream_get_meta_data ($tmpFile);
+    $tmpFileLocation = $info['uri'];
+
+    $result = codiana_generator_parser::generate ($tmpFile);
+    if ($result == true) {
+        $files = codiana_get_file_transfer ();
+        $inputFileLocation = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT);
+
+        // delete previous file
+        if (!$files->deleteFile ($inputFileLocation) && $files->exists ($inputFileLocation))
+            return codiana_message::create ('cannotdeleteinputfile', 'error');
+
+        // copy file
+        if (!$files->copyFile ($tmpFileLocation, $inputFileLocation) && !$files->exists ($inputFileLocation))
+            return codiana_message::create ('cannotcreateinputfile', 'error');
+    }
+    fclose ($tmpFile);
+    return null;
+}
+
+
 
 class codiana_message {
 
@@ -817,6 +840,12 @@ class codiana_message {
      */
     public function render () {
         return html_writer::tag ('li', $this->content, $this->attributes);
+    }
+
+
+
+    public function renderAll () {
+        echo codiana_message::renderItems (array ($this));
     }
 
 

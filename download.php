@@ -25,12 +25,15 @@
 
 require_once (dirname (__FILE__) . '/../../config.php');
 require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
-require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
 
 global $DB;
 
 // grab course module id
 $id = optional_param ('id', 0, PARAM_INT);
+$type = required_param ('type', PARAM_ALPHA);
+
+if ($type != 'i' && $type != 'o')
+    print_error ('invalidcoursemodule');
 
 // try to find right module or throw error
 if ($id) {
@@ -47,43 +50,41 @@ if ($id) {
     print_error ('invalidcoursemodule');
 }
 
+$context = context_module::instance ($cm->id);
+
+
+
+// Check the contextlevel is as expected - if your plugin is a block, this becomes CONTEXT_BLOCK, etc.
+if ($context->contextlevel != CONTEXT_MODULE) {
+    return false;
+}
+
 // check login and grap context
 require_login ($course, false, $cm);
 
+
 // clean-up URL
-$url = new moodle_url('/mod/codiana/generateinput.php', array ('id' => $cm->id));
-
-$PAGE->set_url ($url);
-$PAGE->set_title ('Submit solution');
-$PAGE->set_heading ("Submitting solution to '$codiana->name'");
-$PAGE->set_pagelayout ('standard');
-$PAGE->requires->jquery();
-$PAGE->requires->js('/mod/codiana/html/js/sprintf.min.js', true);
-$PAGE->requires->js('/mod/codiana/html/js/generateinput.js', true);
-$PAGE->requires->css('/mod/codiana/html/css/generateinput.css');
-$PAGE->requires->css('/mod/codiana/html/css/view.css');
-$context = context_module::instance ($cm->id);
-global $OUTPUT;
+$url = new moodle_url(
+    '/mod/codiana/download.php',
+    array (
+          'id' => $cm->id,
+          'typw' => $type
+    )
+);
 
 
-echo $OUTPUT->header ();
+// throw error if user doesn't have sufficient permissions
+if (!has_capability ('mod/codiana:managetaskfiles', $context))
+    print_error ('codiana:error:youcannotdownloadthisfile', 'codiana');
 
-require_once ($CFG->dirroot . '/mod/codiana/html/generateinput.html');
-$mform = new mod_codiana_generate_input($codiana, $url);
 
-// Form processing and displaying
-if ($mform->is_cancelled ()) {
-    // form canceled
-} else if ($data = $mform->get_data ()) {
+$tmpFile = tmpfile ();
+$info = stream_get_meta_data ($tmpFile);
+$tmpFileLocation = $info['uri'];
+$inputFileLocation = codiana_get_task_file_path ($codiana, $type == 'i' ? codiana_file_path_type::TASK_INPUT : codiana_file_path_type::TASK_OUTPUT);
 
-    // form is valid, now file check
-    $result = codiana_generate_input ($codiana);
+// grap file transfer
+$files = codiana_get_file_transfer ();
+$result = $files->copyFile ($inputFileLocation, $tmpFileLocation);
 
-    if ($result != null)
-        echo $result->renderAll();
-    else
-        echo codiana_message::create('filegenerated', 'success')->renderAll();
-}
-$mform->display();
-
-echo $OUTPUT->footer ();
+send_file ($tmpFileLocation, ("$codiana->mainfilename.") . ($type == 'i' ? 'in' : 'out'));

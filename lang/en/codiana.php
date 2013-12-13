@@ -153,7 +153,7 @@ $string['codiana:abortedsolution:warning'] = 'Your previous attempt was not yet 
 
 
 // error
-$string['codiana:error:youcannotdownloadthissolution'] = "You don't have sufficient permissions to download this file!";
+$string['codiana:error:youcannotdownloadthisfile'] = "You don't have sufficient permissions to download this file!";
 $string['codiana:error:filedoesnotexists'] = "File you're looking for does't exists!";
 
 
@@ -166,6 +166,10 @@ $string['codiana:submitprotosolution'] = 'Submit prototype solution';
 $string['codiana:submitsolution'] = 'Submit solution';
 $string['codiana:viewmyattempts'] = 'View ones attempts';
 $string['codiana:viewresults'] = 'View all results';
+
+
+$string['codiana:downloadoutput'] = 'Download current output';
+$string['codiana:downloadinput'] = 'Download current input';
 
 
 
@@ -186,6 +190,8 @@ $string['codiana:message:errorgeneratinginput'] = 'Error while generating input 
 $string['codiana:message:cannotdeleteoutputfile'] = 'Cannot delete output file';
 $string['codiana:message:cannotcreateoutputfile'] = 'Cannot create output file';
 $string['codiana:message:outputsaved'] = 'Output file was successfully saved';
+$string['codiana:message:fileistoobig'] = 'Generated file is too large!';
+$string['codiana:message:filegenerated'] = 'Input file was successfully generated!';
 
 
 

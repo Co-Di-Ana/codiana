@@ -231,9 +231,12 @@ class mod_codiana_managefiles_form extends mod_codiana_solution_file_form {
         $name = 'outputorsolutionfile';
         $this->addTaskFileElement ($name, false, '*');
 
-        if ($this->files->output)
+        if ($this->files->output) {
             $this->addHTML ('By submitting output file, you will override existing output file!', 'warning');
-        else
+            $link = new moodle_url('/mod/codiana/download.php', array ('id' => $this->url->param ('id'), 'type' => 'o'));
+            $link =  html_writer::link ($link, get_string ('codiana:downloadoutput', 'codiana'));
+            $this->mform->addElement ('static', 'name', '', $link);
+        } else
             $this->addHTML ('You need to submit output file in order to be able activate task!', 'error');
     }
 
@@ -243,8 +246,12 @@ class mod_codiana_managefiles_form extends mod_codiana_solution_file_form {
         $name = 'inputfile';
         $this->addTaskFileElement ($name, false, '*.in');
 
-        if ($this->files->input)
+        if ($this->files->input) {
             $this->addHTML ('By submitting input file, you will override existing input file!', 'warning');
+            $link = new moodle_url('/mod/codiana/download.php', array ('id' => $this->url->param ('id'), 'type' => 'i'));
+            $link =  html_writer::link ($link, get_string ('codiana:downloadinput', 'codiana'));
+            $this->mform->addElement ('static', 'name', '', $link);
+        }
         else
             $this->addHTML ('You need to submit input file in order to be able activate task!', 'error');
 
@@ -342,12 +349,18 @@ class mod_codiana_generate_input extends moodleform {
         $errors = parent::validation ($data, $files);
         require_once ($CFG->dirroot . '/mod/codiana/generateinputlib.php');
         $object = (object)$data;
-        $object->generateinput = '"csa';
 
-        $result = generator_parser::create ($object->generateinput);
+        $result = codiana_generator_parser::check ($object->generateinput);
         if ($result == false)
-            $errors['generateinput'] = 'wrong value';
-
+            $errors['generateinput'] = codiana_generator_parser::getError ();
         return $errors;
+    }
+
+
+
+    public function display () {
+        if (!empty($this->mform->_errors))
+            echo html_writer::tag ('p', "JSON error format (code {$this->mform->_errors['generateinput']})", array ('class' => 'error'));
+        return parent::display ();
     }
 }
