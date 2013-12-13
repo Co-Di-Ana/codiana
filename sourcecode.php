@@ -83,7 +83,7 @@ $hasPermission = $settings & (1 << $codeIndex);
 
 // throw error if user doesn't have sufficient permissions
 if (!$hasPermission)
-    print_error('codiana:error:youcannotdownloadthissolution', 'codiana');
+    print_error('codiana:error:youcannotdownloadthisfile', 'codiana');
 
 
 // TODO change of global config path may result into moving files to new location
@@ -94,6 +94,7 @@ $userName = sprintf ('user-%05d', $userid);
 
 
 // grap file transfer
+// TODO add remote support
 $fileTransfer = codiana_get_file_transfer ();
 $content = $fileTransfer->loadFile ("$dataDir/$codianaName/$userName/prev/$attemptName.zip");
 

@@ -12,6 +12,26 @@ interface IFileTransfer {
 
 
     /**
+     * Method moves file from one location to another
+     * @param $originalLocation string which file to move
+     * @param $finalLocation string where to move it
+     * @return bool true on success, false on error
+     */
+    public function moveFile ($originalLocation, $finalLocation);
+
+
+
+    /**
+     * Method copies file from one location to another
+     * @param $originalLocation string which file to copy
+     * @param $finalLocation string where to move it
+     * @return bool true on success, false on error
+     */
+    public function copyFile ($originalLocation, $finalLocation);
+
+
+
+    /**
      * @param $path
      * @return bool|string false on failure, content on success
      */
@@ -242,6 +262,17 @@ class RemoteFileTransfer implements IFileTransfer {
             $this->config->$key = $value;
     }
 
+
+
+    public function moveFile ($originalLocation, $finalLocation) {
+        // TODO Implement moveFile() method
+    }
+
+
+
+    public function copyFile ($originalLocation, $finalLocation) {
+        // TODO Implement moveFile() method
+    }
 }
 
 
@@ -255,8 +286,23 @@ class LocalFileTransfer implements IFileTransfer {
 
 
 
+    public function moveFile ($originalLocation, $finalLocation) {
+        $this->mkDir (@dirname ($finalLocation));
+        return @rename ($originalLocation, $finalLocation);
+    }
+
+
+
+    public function copyFile ($originalLocation, $finalLocation) {
+        $result = $this->mkDir (dirname ($finalLocation));
+        $result &= @copy ($originalLocation, $finalLocation);
+        return $result;
+    }
+
+
+
     public function loadFile ($path) {
-        return file_get_contents ($path, FILE_BINARY);
+        return @file_get_contents ($path, FILE_BINARY);
     }
 
 
@@ -269,10 +315,10 @@ class LocalFileTransfer implements IFileTransfer {
 
     public function deleteDir ($path) {
         if (is_dir ($path)) {
-            $files = array_diff (scandir ($path), array ('.', '..'));
+            $files = @array_diff (@scandir ($path), array ('.', '..'));
             foreach ($files as $file)
-                (is_dir ("$path/$file")) ? $this->deleteDir ("$path/$file") : unlink ("$path/$file");
-            return rmdir ($path);
+                (@is_dir ("$path/$file")) ? $this->deleteDir ("$path/$file") : unlink ("$path/$file");
+            return @rmdir ($path);
         }
     }
 
@@ -346,7 +392,7 @@ class LocalFileTransfer implements IFileTransfer {
 
 
     public function exists ($location) {
-        return file_exists ($location);
+        return @file_exists ($location);
     }
 
 }
