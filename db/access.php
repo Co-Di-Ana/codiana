@@ -92,26 +92,6 @@ $capabilities = array (
             'manager' => CAP_ALLOW
         )
     ),
-    //# ----- capability to submit teacher prototype solution for measuring  time and memory -------
-    'mod/codiana:submitprotosolution' => array (
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    //# ----- capability to create input file ------------------------------------------------------
-    'mod/codiana:createinputfile' => array (
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
     //# ----- capability to manage task files (input, proto, ...) ----------------------------------
     'mod/codiana:managetaskfiles' => array (
         'riskbitmask' => RISK_XSS,
