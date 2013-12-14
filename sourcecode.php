@@ -54,7 +54,7 @@ $context = context_module::instance ($cm->id);
 
 // Check the contextlevel is as expected - if your plugin is a block, this becomes CONTEXT_BLOCK, etc.
 if ($context->contextlevel != CONTEXT_MODULE) {
-    print_error('codiana:error:youcannotdownloadthisfile', 'codiana');
+    print_error ('codiana:error:youcannotdownloadthisfile', 'codiana');
 }
 
 // check login and grap context
@@ -83,20 +83,18 @@ $hasPermission = $settings & (1 << $codeIndex);
 
 // throw error if user doesn't have sufficient permissions
 if (!$hasPermission)
-    print_error('codiana:error:youcannotdownloadthisfile', 'codiana');
-
-
-// TODO change of global config path may result into moving files to new location
-$dataDir = get_config ('codiana', 'storagepath');
-$attemptName = sprintf ('attempt-%03d', $ordinal);
-$codianaName = sprintf ('task-%04d', $codiana->id);
-$userName = sprintf ('user-%05d', $userid);
+    print_error ('codiana:error:youcannotdownloadthisfile', 'codiana');
 
 
 // grap file transfer
-// TODO add remote support
-$fileTransfer = codiana_get_file_transfer ();
-$content = $fileTransfer->loadFile ("$dataDir/$codianaName/$userName/prev/$attemptName.zip");
+$files = codiana_get_file_transfer ();
+$filePath = codiana_get_user_file_path ($codiana, codiana_file_path_type::USER_PREVIOUS_ZIP, $userid, $ordinal);
+if (!$files->exists($filePath))
+    print_error('codiana:error:filedoesnotexists', 'codiana');
+
+// get content
+$content = $files->loadFile ($filePath);
+
 
 // create tmp file and write result
 $tmpFile = tmpfile ();
@@ -105,4 +103,4 @@ fwrite ($tmpFile, $content);
 // finally, send file to user
 $info = stream_get_meta_data ($tmpFile);
 $uri = $info['uri'];
-send_file ($uri, "$attemptName.zip");
+send_file ($uri, "$codiana->mainfilename.zip");
