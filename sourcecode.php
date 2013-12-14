@@ -48,13 +48,13 @@ if ($id) {
     print_error ('invalidcoursemodule');
 }
 
+// check login and grap context
+require_login ($course, false, $cm);
 $context = context_module::instance ($cm->id);
-
-
 
 // Check the contextlevel is as expected - if your plugin is a block, this becomes CONTEXT_BLOCK, etc.
 if ($context->contextlevel != CONTEXT_MODULE) {
-    return false;
+    print_error('codiana:error:youcannotdownloadthisfile', 'codiana');
 }
 
 // check login and grap context

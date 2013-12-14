@@ -50,9 +50,12 @@ if ($id) {
 // check login and grap context
 require_login ($course, false, $cm);
 
+// ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
+$context = context_module::instance ($cm->id);
+require_capability('mod/codiana:managetaskfiles', $context);
+
 // clean-up URL
 $url = new moodle_url('/mod/codiana/generateinput.php', array ('id' => $cm->id));
-
 $PAGE->set_url ($url);
 $PAGE->set_title ('Submit solution');
 $PAGE->set_heading ("Submitting solution to '$codiana->name'");
@@ -62,7 +65,6 @@ $PAGE->requires->js('/mod/codiana/html/js/sprintf.min.js', true);
 $PAGE->requires->js('/mod/codiana/html/js/generateinput.js', true);
 $PAGE->requires->css('/mod/codiana/html/css/generateinput.css');
 $PAGE->requires->css('/mod/codiana/html/css/view.css');
-$context = context_module::instance ($cm->id);
 global $OUTPUT;
 
 

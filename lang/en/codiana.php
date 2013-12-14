@@ -153,7 +153,6 @@ $string['codiana:abortedsolution:warning'] = 'Your previous attempt was not yet 
 
 
 // error
-$string['codiana:error:youcannotdownloadthisfile'] = "You don't have sufficient permissions to download this file!";
 $string['codiana:error:filedoesnotexists'] = "File you're looking for does't exists!";
 
 

@@ -472,28 +472,31 @@ function codiana_extend_settings_navigation (settings_navigation $settingsnav, n
 
     $keys = $codiananode->get_children_key_list ();
     $beforeKey = sizeof ($keys) > 0 ? $keys[0] : null;
+    $context = $PAGE->cm->context;
+    $id = $PAGE->cm->id;
 
     // can submit solution
-    if (has_capability ('mod/codiana:submitsolution', $PAGE->cm->context)) {
-        $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $PAGE->cm->id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Odevzdat řešení", $url,
-                                         navigation_node::TYPE_SETTING, null, 'mod_codiana_submitsolution');
+    if (has_capability ('mod/codiana:submitsolution', $context)) {
+        $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $id, 'sesskey' => sesskey ()));
+        $node = navigation_node::create ("Odevzdat řešení", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_submitsolution');
         $codiananode->add_node ($node, $beforeKey);
     }
 
     // can view ones results
-    if (has_capability ('mod/codiana:viewmyattempts', $PAGE->cm->context)) {
-        $url = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $PAGE->cm->id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Zobrazit výsledky", $url,
-                                         navigation_node::TYPE_SETTING, null, 'mod_codiana_viewmyattempts');
+    if (has_capability ('mod/codiana:viewmyattempts', $context)) {
+        $url = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $id, 'sesskey' => sesskey ()));
+        $node = navigation_node::create ("Zobrazit výsledky", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_viewmyattempts');
         $codiananode->add_node ($node, $beforeKey);
     }
 
     // can manage task files
-    if (has_capability ('mod/codiana:managetaskfiles', $PAGE->cm->context)) {
-        $url = new moodle_url('/mod/codiana/managefiles.php', array ('id' => $PAGE->cm->id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Manage files", $url,
-                                         navigation_node::TYPE_SETTING, null, 'mod_codiana_managetaskfiles');
+    if (has_capability ('mod/codiana:managetaskfiles', $context)) {
+        $url = new moodle_url('/mod/codiana/managefiles.php', array ('id' => $id, 'sesskey' => sesskey ()));
+        $node = navigation_node::create ("Manage files", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_managetaskfiles');
+        $codiananode->add_node ($node, $beforeKey);
+
+        $url = new moodle_url('/mod/codiana/generateinput.php', array ('id' => $id, 'sesskey' => sesskey ()));
+        $node = navigation_node::create ("Generate input file", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_generateinput');
         $codiananode->add_node ($node, $beforeKey);
     }
 

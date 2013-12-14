@@ -50,6 +50,10 @@ if ($id) {
 // check login and grap context
 require_login ($course, false, $cm);
 
+// ----- CAPABILITY submitsolution ----------------------------------------------------------------
+$context = context_module::instance ($cm->id);
+require_capability('mod/codiana:submitsolution', $context);
+
 // clean-up URL
 $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $cm->id));
 
@@ -57,7 +61,6 @@ $PAGE->set_url ($url);
 $PAGE->set_title ('Submit solution');
 $PAGE->set_heading ("Submitting solution to '$codiana->name'");
 $PAGE->set_pagelayout ('standard');
-$context = context_module::instance ($cm->id);
 global $OUTPUT;
 
 

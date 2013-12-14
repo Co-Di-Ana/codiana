@@ -72,10 +72,10 @@ $url = new moodle_url(
     )
 );
 
-
+// ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
 // throw error if user doesn't have sufficient permissions
-if (!has_capability ('mod/codiana:managetaskfiles', $context))
-    print_error ('codiana:error:youcannotdownloadthisfile', 'codiana');
+$context = context_module::instance ($cm->id);
+require_capability('mod/codiana:managetaskfiles', $context);
 
 
 $tmpFile = tmpfile ();

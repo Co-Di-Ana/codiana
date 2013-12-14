@@ -50,14 +50,16 @@ if ($id) {
 // check login and grap context
 require_login ($course, false, $cm);
 
+// ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
+$context = context_module::instance ($cm->id);
+require_capability('mod/codiana:managetaskfiles', $context);
+
 // clean-up URL
 $url = new moodle_url('/mod/codiana/managefiles.php', array ('id' => $cm->id));
-
 $PAGE->set_url ($url);
 $PAGE->set_title ('My modules page title');
 $PAGE->set_heading ('My modules page heading');
 $PAGE->set_pagelayout ('standard');
-$context = context_module::instance ($cm->id);
 $output = $PAGE->get_renderer ('mod_codiana');
 $output->init ($codiana, $cm, $context, $course);
 global $OUTPUT;
