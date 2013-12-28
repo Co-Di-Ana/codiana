@@ -33,8 +33,8 @@ require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 $settings->add (
     new admin_setting_configtext(
         'codiana/limittime',
-        get_string ('codiana:setting:limittime', 'codiana'),
-        get_string ('codiana:setting:limittime_desc', 'codiana'),
+        get_string ('setting:limittime', 'codiana'),
+        get_string ('setting:limittime_desc', 'codiana'),
         60, PARAM_INT, 4
     )
 );
@@ -43,8 +43,8 @@ $settings->add (
 $settings->add (
     new admin_setting_configtext(
         'codiana/limitmemory',
-        get_string ('codiana:setting:limitmemory', 'codiana'),
-        get_string ('codiana:setting:limitmemory_desc', 'codiana'),
+        get_string ('setting:limitmemory', 'codiana'),
+        get_string ('setting:limitmemory_desc', 'codiana'),
         100, PARAM_INT, 4
     )
 );
@@ -55,16 +55,16 @@ $settings->add (
 $settings->add (
     new admin_setting_heading(
         'name',
-        get_string ('codiana:setting:storage', 'codiana'),
-        get_string ('codiana:setting:storage_desc', 'codiana')
+        get_string ('setting:storage', 'codiana'),
+        get_string ('setting:storage_desc', 'codiana')
     )
 );
 
 $settings->add (
     new admin_setting_configcheckbox(
         'codiana/islocal',
-        get_string ('codiana:setting:islocal', 'codiana'),
-        get_string ('codiana:setting:islocal_desc', 'codiana'),
+        get_string ('setting:islocal', 'codiana'),
+        get_string ('setting:islocal_desc', 'codiana'),
         1
     )
 );
@@ -73,8 +73,8 @@ $settings->add (
 $settings->add (
     new admin_setting_configtext(
         'codiana/storagepath',
-        get_string ('codiana:setting:storagepath', 'codiana'),
-        get_string ('codiana:setting:storagepath_desc', 'codiana'),
+        get_string ('setting:storagepath', 'codiana'),
+        get_string ('setting:storagepath_desc', 'codiana'),
         '/var/codiana/data', PARAM_TEXT, 100
     )
 );
@@ -83,8 +83,8 @@ $settings->add (
 $settings->add (
     new admin_setting_configtext(
         'codiana/sshusername',
-        get_string ('codiana:setting:sshusername', 'codiana'),
-        get_string ('codiana:setting:sshusername_desc', 'codiana'),
+        get_string ('setting:sshusername', 'codiana'),
+        get_string ('setting:sshusername_desc', 'codiana'),
         '', PARAM_ALPHANUMEXT, 30
     )
 );
@@ -93,8 +93,8 @@ $settings->add (
 $settings->add (
     new admin_setting_configpasswordunmask (
         'codiana/sshpassword',
-        get_string ('codiana:setting:sshpassword', 'codiana'),
-        get_string ('codiana:setting:sshpassword_desc', 'codiana'),
+        get_string ('setting:sshpassword', 'codiana'),
+        get_string ('setting:sshpassword_desc', 'codiana'),
         ''
     )
 );

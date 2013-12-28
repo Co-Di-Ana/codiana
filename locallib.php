@@ -31,48 +31,149 @@ defined ('MOODLE_INTERNAL') || die();
 /**
  * Class codiana_state, helper class for task states
  */
-class codiana_state {
+class codiana_attempt_state {
 
     /** @var string */
-    const PREFIX = 'codiana:state:';
+    const PREFIX = 'state:';
 
-    const WAITINGTOPROCESS = 0;
+    // ---------------------------------------------------------------------------------------------
+    // ------- SPECIAL STATES ----------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    /**
+     * Other non specific error
+     * @var int
+     */
+    const OTHER_ERROR = 0;
 
-    const CORRECTSOLUTION = 1;
+    /**
+     * Processing has been aborted
+     * @var int
+     */
+    const PROCESS_ABORTED = 99;
 
-    const WRONGSOLUTION = 2;
+    /**
+     * Waiting in queue for processing
+     * @var int
+     */
+    const WAITING_TO_PROCESS = 1;
 
-    const MAXTIMELIMIT = 3;
+    // ---------------------------------------------------------------------------------------------
+    // ------- CODE SPECIFIC STATES ----------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    /**
+     * Source code containg dangerous elements (packages, commands, etc.)
+     * @var int
+     */
+    const CODE_DANGEROUS = 2;
 
-    const MAXMEMORYLIMIT = 4;
+    /**
+     * Source code in either in non-readable state, or has broken rules for this task
+     * @var int
+     */
+    const CODE_INVALID = 3;
 
-    const COMPILATIONERROR = 5;
+    /**
+     * Source code is valid and can be processed
+     * @var int
+     */
+    const CODE_VALID = 4;
 
-    const RUNERROR = 6;
+    // ---------------------------------------------------------------------------------------------
+    // ------- COMPILATION STATES ------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    /**
+     * Error during compilation
+     * @var int
+     */
+    const COMPILATION_ERROR = 5;
 
-    const LOOPERROR = 7;
+    /**
+     * Compilation was not completed in time, usually broken code
+     * @var int
+     */
+    const COMPILATION_TIMEOUT = 6;
 
-    const DANGEROUSCODE = 8;
+    /**
+     * Compilation was successful
+     * @var int
+     */
+    const COMPILATION_OK = 7;
 
-    const NOMAINCLASS = 9;
+    // ---------------------------------------------------------------------------------------------
+    // ------- RUN STATES --------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    /**
+     * Error during execution
+     * @var int
+     */
+    const EXECUTION_ERROR = 8;
 
-    const ABORTED = 10;
+    /**
+     * Execution was not completed in time and was be terminated
+     * @var int
+     */
+    const EXECUTION_TIMEOUT = 9;
 
-    const UNKWNOWNERROR = '?';
+    /**
+     * Execution was successful
+     * @var int
+     */
+    const EXECUTION_OK = 10;
+
+    // ---------------------------------------------------------------------------------------------
+    // ------- MEASURE STATES ----------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    /**
+     * Task required output to be correct and it was not correct
+     * @var int
+     */
+    const OUTPUT_ERROR = 11;
+
+    /**
+     * Task required execution time to be lower than some threshold and it took longer to execute
+     * @var int
+     */
+    const TIME_ERROR = 12;
+
+    /**
+     * Task required execution memory peak to be lower than some threshold and it memory peak was
+     * overstepped
+     * @var int
+     */
+    const MEMORY_ERROR = 13;
+
+    /**
+     * Measurement was successful
+     * @var int
+     */
+    const MEASUREMENT_OK = 14;
+
+    //
+    // ---------------------------------------------------------------------------------------------
+    //
+
 
     private static $state = array (
-        codiana_state::WAITINGTOPROCESS => 'waitingtoprocess',
-        codiana_state::CORRECTSOLUTION => 'correctsolution',
-        codiana_state::WRONGSOLUTION => 'wrongsolution',
-        codiana_state::MAXTIMELIMIT => 'maxtimelimit',
-        codiana_state::MAXMEMORYLIMIT => 'maxmemorylimit',
-        codiana_state::COMPILATIONERROR => 'compilationerror',
-        codiana_state::RUNERROR => 'runerror',
-        codiana_state::LOOPERROR => 'looperror',
-        codiana_state::DANGEROUSCODE => 'dangerouscode',
-        codiana_state::NOMAINCLASS => 'nomainclass',
-        codiana_state::ABORTED => 'aborted',
-        codiana_state::UNKWNOWNERROR => 'unkwnownerror'
+        self::OTHER_ERROR         => 'other_error',
+        self::PROCESS_ABORTED     => 'process_aborted',
+        self::WAITING_TO_PROCESS  => 'waiting_to_process',
+
+        self::CODE_DANGEROUS      => 'code_dangerous',
+        self::CODE_INVALID        => 'code_invalid',
+        self::CODE_VALID          => 'code_valid',
+
+        self::COMPILATION_ERROR   => 'comiplation_error',
+        self::COMPILATION_TIMEOUT => 'comiplation_timeout',
+        self::COMPILATION_OK      => 'comiplation_ok',
+
+        self::EXECUTION_ERROR     => 'execution_error',
+        self::EXECUTION_TIMEOUT   => 'execution_timeout',
+        self::EXECUTION_OK        => 'execution_ok',
+
+        self::OUTPUT_ERROR        => 'output_error',
+        self::TIME_ERROR          => 'time_error',
+        self::MEMORY_ERROR        => 'memory_error',
+        self::MEASUREMENT_OK      => 'measurement_ok',
     );
 
 
@@ -82,11 +183,12 @@ class codiana_state {
      * @return string state name
      */
     public static function get ($value) {
-        return get_string (codiana_state::PREFIX .
-                           (array_key_exists ($value, codiana_state::$state) ?
-                               codiana_state::$state[$value] :
-                               codiana_state::$state['?']
-                           ), 'codiana');
+        return get_string (
+            self::PREFIX .
+            (array_key_exists ($value, self::$state) ?
+                self::$state[$value] :
+                self::$state['?']
+            ), 'codiana');
     }
 }
 
@@ -129,20 +231,20 @@ class codiana_display_options {
  */
 class codiana_grade_method {
 
-    const SOLUTION_FIRST = 0;
+    const SOLUTION_FIRST = 1;
 
-    const SOLUTION_LAST = 1;
+    const SOLUTION_LAST = 2;
 
-    const SOLUTION_BEST = 2;
+    const SOLUTION_BEST = 3;
 
 //    const SOLUTION_MEAN = 3;
 
     /** @var array of all grade methods */
     public static $types = array (
-        codiana_grade_method::SOLUTION_FIRST => 'codiana:grademethod:first',
-        codiana_grade_method::SOLUTION_LAST => 'codiana:grademethod:last',
-        codiana_grade_method::SOLUTION_BEST => 'codiana:grademethod:best',
-//        codiana_grade_method::SOLUTION_MEAN => 'codiana:grademethod:mean'
+        codiana_grade_method::SOLUTION_FIRST => 'grademethod:first',
+        codiana_grade_method::SOLUTION_LAST  => 'grademethod:last',
+        codiana_grade_method::SOLUTION_BEST  => 'grademethod:best',
+//        codiana_grade_method::SOLUTION_MEAN => 'grademethod:mean'
     );
 }
 
@@ -154,17 +256,17 @@ class codiana_grade_method {
  */
 class codiana_output_method {
 
-    const GRADE_STRICT = 0;
+    const GRADE_STRICT = 1;
 
-    const GRADE_TOLERANT = 1;
+    const GRADE_TOLERANT = 2;
 
-    const GRADE_VAGUE = 2;
+    const GRADE_VAGUE = 3;
 
     /** @var array of all output methods */
     public static $types = array (
-        codiana_output_method::GRADE_STRICT => 'codiana:outputmethod:strict',
-        codiana_output_method::GRADE_TOLERANT => 'codiana:outputmethod:tolerant',
-        codiana_output_method::GRADE_VAGUE => 'codiana:outputmethod:vague'
+        codiana_output_method::GRADE_STRICT   => 'outputmethod:strict',
+        codiana_output_method::GRADE_TOLERANT => 'outputmethod:tolerant',
+        codiana_output_method::GRADE_VAGUE    => 'outputmethod:vague'
     );
 }
 
@@ -245,7 +347,7 @@ function codiana_solution_submit () {
  * @return string file extension
  */
 function codiana_solution_get_extension ($mform, $name) {
-    $filename = $mform->get_new_filename ($name);
+    $filename  = $mform->get_new_filename ($name);
     $extension = pathinfo ($filename, PATHINFO_EXTENSION);
 
     return $extension;
@@ -280,7 +382,7 @@ function codiana_get_file_transfer () {
  */
 function codiana_get_supported_languages () {
     global $DB;
-    $result = $DB->get_records ('codiana_language', null, '', 'extension,name');
+    $result    = $DB->get_records ('codiana_language', null, '', 'extension,name');
     $languages = array ();
     foreach ($result as $language)
         $languages[$language->extension] = $language->name;
@@ -304,7 +406,7 @@ function codiana_get_task_languages ($task) {
 
     // get all allowed languages
     $allLanguages = codiana_get_supported_languages ();
-    $languages = array ();
+    $languages    = array ();
     foreach ($result as $extension) {
         if (array_key_exists ($extension, $allLanguages))
             $languages[$extension] = $allLanguages[$extension];
@@ -320,7 +422,7 @@ function codiana_get_task_languages ($task) {
  * @param $fields array which field will be selected
  * @return array of all users attempts, id is key, value is attempt
  */
-function codiana_get_all_attempts ($task, $userID, $fields = array (), $order = 'timesent DESC') {
+function codiana_get_user_all_attempts ($task, $userID, $fields = array (), $order = 'timesent DESC') {
     global $DB;
     $fields = implode (",", $fields);
     $result = $DB->get_records_sql (
@@ -347,7 +449,7 @@ function codiana_get_all_attempts ($task, $userID, $fields = array (), $order = 
  * based on $task settitng, will return SOLUTION_LAST OR SOLUTION_FIRST or SOLUTION_BEST solutions
  * @throws Exception when task is wrongly configured
  */
-function codiana_get_grade_attempt ($task, $userID, $fields = array ()) {
+function codiana_get_user_grade_attempt ($task, $userID, $fields = array ()) {
     global $DB;
     $order =
         ($task->grademethod == codiana_grade_method::SOLUTION_LAST ? 'timesent desc' :
@@ -385,7 +487,7 @@ function codiana_get_grade_attempt ($task, $userID, $fields = array ()) {
  * array where id is key, value is attempt
  * @throws Exception when task is wrongly configured
  */
-function codiana_get_grade_attempts ($task) {
+function codiana_get_task_grade_attempts ($task) {
     global $DB;
     $order =
         ($task->grademethod == codiana_grade_method::SOLUTION_LAST ? 'timesent desc' :
@@ -394,20 +496,82 @@ function codiana_get_grade_attempts ($task) {
             )
         );
 
-    echo $order . "<br />";
     if (is_null ($order))
         throw new Exception ('wrong task setting');
 
     $result = $DB->get_records_sql (
-        "SELECT *
-        FROM {codiana_attempt}
-        WHERE taskid = :taskid
+        "SELECT
+              attempt.*,
+              CONCAT_WS (' ', UPPER(user.lastname), user.firstname) AS username,
+              attempt.ordinal AS code
+        FROM
+              {codiana_attempt} attempt
+        LEFT JOIN {user} user ON
+              (attempt.userid = user.id)
+        WHERE
+            (taskid = :taskid)
+
         GROUP BY userid
-        ORDER BY $order, resultfinal DESC",
+        ORDER BY $order, resultfinal DESC, username ASC",
         array ('taskid' => $task->id),
         IGNORE_MISSING
     );
+    if (empty($result))
+        return array ();
     return $result;
+}
+
+/**
+ * @param $task stdClass task object
+ * @return array of result for each student having one or more attempt one row
+ * @throws Exception when task is wrongly configured
+ */
+function codiana_get_task_all_attempts ($task) {
+    global $DB;
+
+    $result = $DB->get_records_sql (
+        "SELECT
+              attempt.*,
+              CONCAT_WS (' ', UPPER(user.lastname), user.firstname) AS username,
+              attempt.ordinal AS code
+        FROM
+              {codiana_attempt} attempt
+        LEFT JOIN {user} user ON
+              (attempt.userid = user.id)
+        WHERE
+            (taskid = :taskid)
+
+        ORDER BY resultfinal DESC, username ASC",
+        array ('taskid' => $task->id),
+        IGNORE_MISSING
+    );
+    if (empty($result))
+        return array ();
+    return $result;
+}
+
+function codiana_format_dates ($prev, $current) {
+
+    $diff = $current - $prev;
+    if ($diff < 0)
+        return array ('justnow', '');
+
+    if ($diff <= (2 * 60))
+        return array ('justnow', '');
+
+    if ($diff <= (60 * 60))
+        return array ('xminutesago', intval ($diff / 60));
+
+    if ($diff <= (2 * 60 * 60))
+        return array ('hourago', intval ($diff / (60 * 60)));
+
+    if ($diff <= (24 * 60 * 60))
+        return array ('xhoursago', intval ($diff / (60 * 60)));
+
+    if ($diff <= (48 * 60 * 60))
+        return array ('yesterday', '');
+
+    return array ('xdaysago', intval ($diff / (24 * 60 * 60)));
 }
 
 /**
@@ -428,8 +592,8 @@ function codiana_get_strings_from_array ($array) {
  * @return bool wheter is task in open state (depends on time)
  */
 function codiana_is_task_open ($task, $time = null) {
-    $time = $time == null ? time () : intval ($time);
-    $open = $task->timeopen;
+    $time  = $time == null ? time () : intval ($time);
+    $open  = $task->timeopen;
     $close = $task->timeclose;
 
     if (is_null ($open) && is_null ($close))
@@ -474,8 +638,8 @@ function codiana_get_task_state ($isOpen, $isSolver) {
  */
 function codiana_get_task_fields ($task, $mask) {
     $setting = $task->settings;
-    $fields = array ();
-    $i = $mask;
+    $fields  = array ();
+    $i       = $mask;
     foreach (codiana_display_options::$fields as $field) {
         if ($setting & (1 << $i))
             $fields[] = $field;
@@ -493,25 +657,25 @@ function codiana_expand_fields ($fields) {
     foreach ($fields as $field) {
         switch ($field) {
             case 'basestat':
-                $result['id'] = 'attempt.id';
+                $result['id']       = 'attempt.id';
                 $result['username'] = "CONCAT_WS (' ', UPPER(user.lastname), user.firstname) AS username";
                 $result['timesent'] = "attempt.timesent";
-                $result['ordinal'] = "attempt.ordinal";
+                $result['ordinal']  = "attempt.ordinal";
                 break;
             case 'runstat':
-                $result['runtime'] = 'attempt.runtime';
+                $result['runtime']   = 'attempt.runtime';
                 $result['runmemory'] = 'attempt.runmemory';
                 $result['runoutput'] = 'attempt.runoutput';
                 break;
             case 'resultstat':
-                $result['resulttime'] = 'attempt.resulttime';
+                $result['resulttime']   = 'attempt.resulttime';
                 $result['resultmemory'] = 'attempt.resultmemory';
                 $result['resultoutput'] = 'attempt.resultoutput';
-                $result['resultfinal'] = 'attempt.resultfinal';
+                $result['resultfinal']  = 'attempt.resultfinal';
                 break;
 
             case 'code':
-                $result['code'] = 'attempt.ordinal AS code';
+                $result['code']   = 'attempt.ordinal AS code';
                 $result['taskid'] = 'attempt.taskid';
                 $result['userid'] = 'attempt.userid';
                 break;
@@ -550,6 +714,24 @@ function codiana_get_last_attempt ($task, $userID) {
     );
 }
 
+function codiana_get_user_attempt_count ($task, $userID) {
+    global $DB;
+    return $DB->count_records ('codiana_attempt', array ('userid' => $userID, 'taskid' => $task->id));
+}
+
+function codiana_get_user_count ($task, $userID) {
+    global $DB;
+    $value = $DB->get_field_sql (
+        "SELECT COUNT(DISTINCT userid) as totalusers
+        FROM
+              {codiana_attempt}
+        WHERE
+              (userid != :userid AND taskid = :taskid)",
+        array ('userid' => $userID, 'taskid' => $task->id),
+        IGNORE_MISSING);
+    return intval ($value);
+}
+
 
 
 class codiana_file_path_type {
@@ -581,8 +763,8 @@ class codiana_output_type {
 
 
 function codiana_get_task_file_path ($task, $type) {
-    $dataDir = get_config ('codiana', 'storagepath');
-    $codianaID = sprintf ('task-%04d', $task->id);
+    $dataDir      = get_config ('codiana', 'storagepath');
+    $codianaID    = sprintf ('task-%04d', $task->id);
     $mainfilename = $task->mainfilename;
     switch ($type) {
         case codiana_file_path_type::TASK_INPUT:
@@ -595,9 +777,9 @@ function codiana_get_task_file_path ($task, $type) {
 }
 
 function codiana_get_user_file_path ($task, $type, $id, $detail = null) {
-    $dataDir = get_config ('codiana', 'storagepath');
-    $codianaID = sprintf ('task-%04d', $task->id);
-    $userID = sprintf ('user-%04d', $id);
+    $dataDir      = get_config ('codiana', 'storagepath');
+    $codianaID    = sprintf ('task-%04d', $task->id);
+    $userID       = sprintf ('user-%04d', $id);
     $mainfilename = $task->mainfilename;
 
     switch ($type) {
@@ -614,9 +796,9 @@ function codiana_get_user_file_path ($task, $type, $id, $detail = null) {
 }
 
 function codiana_get_files_status ($task) {
-    $result = array ();
-    $transfer = codiana_get_file_transfer ();
-    $result['input'] = $transfer->exists (codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT));
+    $result           = array ();
+    $transfer         = codiana_get_file_transfer ();
+    $result['input']  = $transfer->exists (codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT));
     $result['output'] = $transfer->exists (codiana_get_task_file_path ($task, codiana_file_path_type::TASK_OUTPUT));
     return $result;
 }
@@ -630,53 +812,53 @@ function codiana_save_user_solution ($task, $userID, $mform, $data) {
     $data = is_object ($data) ? $data : (object)$data;
 
     // mform constanst
-    $content = $mform->get_file_content ($data->elementName);
-    $extension = $mform->extension;
+    $content          = $mform->get_file_content ($data->elementName);
+    $extension        = $mform->extension;
     $defaultExtension = $mform->defaultExtension;
 
     // generate paths
-    $currentFolder = codiana_get_user_file_path ($task, codiana_file_path_type::USER_CURRENT_FOLDER, $userID);
+    $currentFolder  = codiana_get_user_file_path ($task, codiana_file_path_type::USER_CURRENT_FOLDER, $userID);
     $previousFolder = codiana_get_user_file_path ($task, codiana_file_path_type::USER_PREVIOUS_FOLDER, $userID);
-    $solutionFile = codiana_get_user_file_path ($task, codiana_file_path_type::USER_SOLUTION, $userID, $defaultExtension);
-    $zippedFile = codiana_get_user_file_path ($task, codiana_file_path_type::USER_PREVIOUS_ZIP, $userID, $data->attempt);
+    $solutionFile   = codiana_get_user_file_path ($task, codiana_file_path_type::USER_SOLUTION, $userID, $defaultExtension);
+    $zippedFile     = codiana_get_user_file_path ($task, codiana_file_path_type::USER_PREVIOUS_ZIP, $userID, $data->attempt);
 
     // grap codiana_get_file_transfer object
     $fileTransfer = codiana_get_file_transfer ();
 
     // delete old solution and recreate folder
     if (!$fileTransfer->deleteDir ($currentFolder) && $fileTransfer->exists ($currentFolder))
-        throw new moodle_exception ('codiana:error:cannotdeletefolder', 'codiana');
+        throw new moodle_exception ('error:cannotdeletefolder', 'codiana');
     if ((!$fileTransfer->mkDir ($currentFolder) && !$fileTransfer->exists ($currentFolder)) ||
         (!$fileTransfer->mkDir ($previousFolder) && !$fileTransfer->exists ($previousFolder))
     ) {
-        throw new moodle_exception ('codiana:error:cannotcreatefolder', 'codiana');
+        throw new moodle_exception ('error:cannotcreatefolder', 'codiana');
     }
 
     // save new solution
     if (!$fileTransfer->saveFile ($content, $solutionFile))
-        throw new moodle_exception ('codiana:error:cannotsavesolution', 'codiana');
+        throw new moodle_exception ('error:cannotsavesolution', 'codiana');
 
     // if zipped solution, unzip to location and delete zip file
     if ($defaultExtension == 'zip') {
         if (!$fileTransfer->unzip ($solutionFile, $currentFolder))
-            throw new moodle_exception ('codiana:error:cannotunzipsolution', 'codiana');
+            throw new moodle_exception ('error:cannotunzipsolution', 'codiana');
         if (!$fileTransfer->deleteFile ($solutionFile))
-            throw new moodle_exception ('codiana:error:cannotdeletesolution', 'codiana');
+            throw new moodle_exception ('error:cannotdeletesolution', 'codiana');
     }
 
     // zip solution
     if (!$fileTransfer->zipDir ($currentFolder, $zippedFile))
-        throw new moodle_exception ('codiana:error:cannotzipsolution', 'codiana');
+        throw new moodle_exception ('error:cannotzipsolution', 'codiana');
 
     // TODO use codiana_is_zip comparison, not == 'zip'
     $attempt = array (
-        'taskid' => $task->id,
-        'userid' => $userID,
+        'taskid'   => $task->id,
+        'userid'   => $userID,
         'timesent' => time (),
-        'state' => codiana_state::WAITINGTOPROCESS,
+        'state'    => codiana_attempt_state::WAITING_TO_PROCESS,
         'language' => $extension,
-        'detail' => $defaultExtension == 'zip' ? 1 : 0,
-        'ordinal' => $data->attempt
+        'detail'   => $defaultExtension == 'zip' ? 1 : 0,
+        'ordinal'  => $data->attempt
     );
 
     $attemptID = $DB->insert_record (
@@ -686,11 +868,11 @@ function codiana_save_user_solution ($task, $userID, $mform, $data) {
     );
 
     $queue = array (
-        'taskid' => $task->id,
-        'userid' => $userID,
+        'taskid'    => $task->id,
+        'userid'    => $userID,
         'attemptid' => $attemptID,
-        'type' => $data->type,
-        'priority' => $data->priority
+        'type'      => $data->type,
+        'priority'  => $data->priority
     );
 
     $queueID = $DB->insert_record (
@@ -705,14 +887,14 @@ function codiana_save_user_solution ($task, $userID, $mform, $data) {
 function codiana_save_proto_solution ($task, $mform) {
     global $USER, $DB;
 
-    $result = array ();
+    $result        = array ();
     $totalAttempts = $DB->count_records ('codiana_attempt', array ('userid' => $USER->id, 'taskid' => $task->id));
-    $lastAttempt = codiana_get_last_attempt ($task, $USER->id);
-    $warning = $totalAttempts > 0 && $lastAttempt->state == codiana_state::WAITINGTOPROCESS;
+    $lastAttempt   = codiana_get_last_attempt ($task, $USER->id);
+    $warning       = $totalAttempts > 0 && $lastAttempt->state == codiana_attempt_state::WAITING_TO_PROCESS;
 
     if ($warning) {
         // set state to aborted (last attempt) and delete any users queue items
-        $lastAttempt->state = codiana_state::ABORTED;
+        $lastAttempt->state = codiana_attempt_state::PROCESS_ABORTED;
         $DB->update_record ('codiana_attempt', $lastAttempt);
         $DB->delete_records ('codiana_queue', array ('userid' => $USER->id));
     }
@@ -720,10 +902,10 @@ function codiana_save_proto_solution ($task, $mform) {
 
     // save solution
     $data = array (
-        'priority' => 100,
+        'priority'    => 100,
         'elementName' => 'outputorsolutionfile',
-        'attempt' => $totalAttempts + 1,
-        'type' => codiana_queue_type::PROTO_CHECK
+        'attempt'     => $totalAttempts + 1,
+        'type'        => codiana_queue_type::PROTO_CHECK
     );
 
 
@@ -740,11 +922,11 @@ function codiana_save_input_file ($task, $mform) {
 
     // define paths
     $inputPath = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT);
-    $data = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_DATA);
+    $dataPath  = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_DATA);
 
     // grab file transfer
     $files = codiana_get_file_transfer ();
-    $files->mkDir ($data);
+    $files->mkDir ($dataPath);
 
     //delete previous file
     $success = $files->deleteFile ($inputPath);
@@ -768,7 +950,7 @@ function codiana_save_output_file ($task, $mform) {
     $result = array ();
 
     // define paths
-    $files = codiana_get_file_transfer ();
+    $files      = codiana_get_file_transfer ();
     $outputPath = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_OUTPUT);
 
     //delete previous file
@@ -790,13 +972,13 @@ function codiana_save_output_file ($task, $mform) {
 }
 
 function codiana_generate_input ($task) {
-    $tmpFile = tmpfile ();
-    $info = stream_get_meta_data ($tmpFile);
+    $tmpFile         = tmpfile ();
+    $info            = stream_get_meta_data ($tmpFile);
     $tmpFileLocation = $info['uri'];
 
     $result = codiana_generator_parser::generate ($tmpFile);
     if ($result == true) {
-        $files = codiana_get_file_transfer ();
+        $files             = codiana_get_file_transfer ();
         $inputFileLocation = codiana_get_task_file_path ($task, codiana_file_path_type::TASK_INPUT);
 
         // delete previous file
@@ -829,7 +1011,7 @@ class codiana_message {
      */
     public function __construct ($content, $class = null) {
         $this->attributes = is_null ($class) ? array () : array ('class' => $class);
-        $this->content = $content;
+        $this->content    = $content;
     }
 
 
@@ -878,6 +1060,27 @@ class codiana_message {
      * @return codiana_message
      */
     public static function create ($id, $class = null, $component = 'codiana') {
-        return new codiana_message(get_string ('codiana:message:' . $id, $component), $class);
+        return new codiana_message(get_string ('message:' . $id, $component), $class);
     }
 }
+/*
+A = 2
+B = 7
+C = 6
+
+D = 6
+E = 9
+F = 8
+
+G = 0
+H = 6
+J = 9
+
+K = 2
+L = 1
+M = 4
+
+50.45 901
+14.33.602
+
+*/

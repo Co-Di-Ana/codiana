@@ -29,7 +29,7 @@ require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 global $DB;
 
 // grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
+$id   = optional_param ('id', 0, PARAM_INT);
 $type = required_param ('type', PARAM_ALPHA);
 
 if ($type != 'i' && $type != 'o')
@@ -67,7 +67,7 @@ require_login ($course, false, $cm);
 $url = new moodle_url(
     '/mod/codiana/download.php',
     array (
-          'id' => $cm->id,
+          'id'   => $cm->id,
           'typw' => $type
     )
 );
@@ -75,16 +75,20 @@ $url = new moodle_url(
 // ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
 // throw error if user doesn't have sufficient permissions
 $context = context_module::instance ($cm->id);
-require_capability('mod/codiana:managetaskfiles', $context);
+require_capability ('mod/codiana:managetaskfiles', $context);
 
 
-$tmpFile = tmpfile ();
-$info = stream_get_meta_data ($tmpFile);
+$tmpFile         = tmpfile ();
+$info            = stream_get_meta_data ($tmpFile);
 $tmpFileLocation = $info['uri'];
-$inputFileLocation = codiana_get_task_file_path ($codiana, $type == 'i' ? codiana_file_path_type::TASK_INPUT : codiana_file_path_type::TASK_OUTPUT);
+$fileLocation    = codiana_get_task_file_path ($codiana, $type == 'i' ? codiana_file_path_type::TASK_INPUT : codiana_file_path_type::TASK_OUTPUT);
 
 // grap file transfer
 $files = codiana_get_file_transfer ();
-$result = $files->copyFile ($inputFileLocation, $tmpFileLocation);
+if (!$files->exists ($fileLocation))
+    print_error ('error:filedoesnotexists', 'codiana');
+
+$content = $files->loadFile ($fileLocation);
+$result  = $files->saveFile ($content, $tmpFileLocation);
 
 send_file ($tmpFileLocation, ("$codiana->mainfilename.") . ($type == 'i' ? 'in' : 'out'));

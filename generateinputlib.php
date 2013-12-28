@@ -30,7 +30,7 @@ abstract class codiana_abstract_generator extends stdClass {
 
 
     public function __construct ($handle, $id, $format = '%s') {
-        $this->id = $id;
+        $this->id     = $id;
         $this->handle = $handle;
         $this->format = is_int ($format) ? '%0' . $format . 'd' : $format;
     }
@@ -106,9 +106,9 @@ class codiana_generator_variable_step extends codiana_abstract_generator {
 
     public function __construct ($handle, $id, $start, $step, $format) {
         parent::__construct ($handle, $id, $format);
-        $this->start = $start;
+        $this->start   = $start;
         $this->counter = $start;
-        $this->step = $step;
+        $this->step    = $step;
     }
 
 
@@ -120,7 +120,7 @@ class codiana_generator_variable_step extends codiana_abstract_generator {
 
 
     public function getNext () {
-        $result = $this->counter;
+        $result        = $this->counter;
         $this->counter = $this->counter + $this->step;
         return $result;
     }
@@ -246,6 +246,9 @@ class codiana_generator_parser extends stdClass {
     /** @var int */
     private static $bytes;
 
+    /** @var string */
+    public static $json;
+
 
     /** @var int maximum file size (currently 10MB) */
     const MAX_FILE_SIZE = CODIANA_GENERATOR_MAX_FILE_SIZE;
@@ -287,6 +290,7 @@ class codiana_generator_parser extends stdClass {
 
 
     public static function check ($rawJson) {
+        self::$json = $rawJson;
         self::$data = json_decode ($rawJson);
         if ((self::$error = json_last_error ()) != JSON_ERROR_NONE)
             return false;

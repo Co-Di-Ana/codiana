@@ -53,11 +53,11 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
 
     public function init ($codiana, $cm, $context, $course, $messages = array ()) {
-        $this->codiana = new Codiana($codiana);
-        $this->cm = $cm;
-        $this->context = $context;
+        $this->codiana  = new Codiana($codiana);
+        $this->cm       = $cm;
+        $this->context  = $context;
         $this->messages = $messages;
-        $this->course = $course;
+        $this->course   = $course;
     }
 
 
@@ -76,7 +76,7 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
     public function view_page_viewmyattempts ($gradeAttempt, $attempts) {
 
-        $output = '';
+        $output            = '';
         $this->currentTime = time ();
 
         // no grade attempt means no attempts either
@@ -113,19 +113,52 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
 
 
+    public function view_page_viewresults ($attempts, $showAll) {
+
+        $output            = '';
+        $this->currentTime = time ();
+
+        if (!empty ($attempts)) {
+            // head
+            if ($showAll) {
+                $output .= html_writer::tag ('h1', sprintf ("All results for task '%s'", $this->codiana->name));
+            } else {
+                $output .= html_writer::tag ('h1', sprintf ("Grade results for task '%s'", $this->codiana->name));
+            }
+
+            // show results
+            $output .= $this->view_attempts_table ($attempts);
+
+            // tail
+            $url = new moodle_url('/mod/codiana/viewresults.php', array ('id' => $this->cm->id, 'all' => $showAll ? '0' : '1'));
+            if ($showAll) {
+                $output .= html_writer::link ($url, 'Show only grade results');
+            } else {
+                $output .= html_writer::link ($url, 'Show all results');
+            }
+
+        } else {
+            $output .= html_writer::tag ('h1', sprintf ("So far there are none results for task '%s'", $this->codiana->name));
+        }
+
+        return $output;
+    }
+
+
+
     private function view_attempts_table ($attempts) {
         $output = '';
 
-        $table = new html_table();
+        $table                      = new html_table();
         $table->attributes['class'] = 'generaltable codianaattemptsummary';
         $table->attributes['style'] = 'width: 100%';
-        $table->head = array ();
-        $table->align = array ();
-        $table->size = array ();
+        $table->head                = array ();
+        $table->align               = array ();
+        $table->size                = array ();
 
 
         $ignores = array ('id', 'taskid', 'userid');
-        $keys = array_keys ((array)$attempts[key ($attempts)]);
+        $keys    = array_keys ((array)$attempts[key ($attempts)]);
 
         if (in_array ('ordinal', $keys)) {
             unset($keys[array_search ('ordinal', $keys)]);
@@ -138,11 +171,11 @@ class mod_codiana_renderer extends plugin_renderer_base {
                 continue;
             }
             $table->align[] = 'center';
-            $table->size[] = '';
-            $table->head[] = $value;
+            $table->size[]  = '';
+            $table->head[]  = $value;
         }
 
-        $i = count ($attempts);
+        $i    = count ($attempts);
         $data = array ();
         foreach ($attempts as $attempt) {
             $row = array ();
@@ -165,18 +198,19 @@ class mod_codiana_renderer extends plugin_renderer_base {
                 return $value == 0 ? 'simple' : 'complex';
 
             case 'timesent':
-
-                return $this->isToday ($value) ? date ('H:i:s', $value) : date ('H:i:s  (m.d.Y)', $value);
+                $format = codiana_format_dates ($value, $this->currentTime);
+                $date   = sprintf (get_string ("date:$format[0]", 'codiana'), $format[1]);
+                return html_writer::tag ('span', $date, array ('title' => date ("d.m Y (H:i:s)", $value)));
 
             case 'state':
-                return codiana_state::get ($value);
+                return codiana_attempt_state::get ($value);
             case 'code':
                 return html_writer::link (
                     new moodle_url(
                         '/mod/codiana/sourcecode.php',
                         array (
-                              'id' => $this->cm->id,
-                              'userid' => $attempt->userid,
+                              'id'      => $this->cm->id,
+                              'userid'  => $attempt->userid,
                               'ordinal' => $attempt->ordinal
                         )
                     ), 'download');
@@ -192,7 +226,6 @@ class mod_codiana_renderer extends plugin_renderer_base {
      * Output the page information
      */
     private function view_information () {
-        global $CFG;
         $output = '';
         $output .= $this->view_head ();
         $output .= $this->view_description ();
@@ -200,11 +233,11 @@ class mod_codiana_renderer extends plugin_renderer_base {
 
         $output .= $this->view_block (
             $this->view_code (
-                get_string ('codiana:inputexample', 'codiana'),
+                get_string ('inputexample', 'codiana'),
                 $this->codiana->inputexample));
         $output .= $this->view_block (
             $this->view_code (
-                get_string ('codiana:outputexample', 'codiana'),
+                get_string ('outputexample', 'codiana'),
                 $this->codiana->outputexample));
 
         $output .= $this->view_tail ();
@@ -269,64 +302,53 @@ class mod_codiana_renderer extends plugin_renderer_base {
      */
     private function view_tail () {
         $output = '';
-        $output .= $this->view_mainfile_warning ();
         $output .= html_writer::start_tag ('dl', array ('class' => 'beware'));
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:maxusers', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('maxusers', 'codiana'));
             $output .= html_writer::tag ('dd', $this->codiana->maxusers);
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:maxattempts', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('maxattempts', 'codiana'));
             $output .= html_writer::tag ('dd', $this->codiana->maxattempts);
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:difficulty', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('difficulty', 'codiana'));
             $output .= html_writer::tag ('dd', $this->codiana->difficulty);
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:grademethod', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('grademethod', 'codiana'));
             $value = codiana_grade_method::$types[$this->codiana->grademethod];
             $output .= html_writer::tag ('dd', get_string ($value, 'codiana'));
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:outputmethod', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('outputmethod', 'codiana'));
             $value = codiana_output_method::$types[$this->codiana->outputmethod];
             $output .= html_writer::tag ('dd', get_string ($value, 'codiana'));
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:limittime', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('limittime', 'codiana'));
             $output .= html_writer::tag ('dd', $this->codiana->limittimefalling);
             $output .= html_writer::tag ('dd', $this->codiana->limittimenothing);
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:limitmemory', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('limitmemory', 'codiana'));
             $output .= html_writer::tag ('dd', $this->codiana->limitmemoryfalling);
             $output .= html_writer::tag ('dd', $this->codiana->limitmemorynothing);
         }
         {
-            $output .= html_writer::tag ('dt', get_string ('codiana:languages', 'codiana'));
+            $output .= html_writer::tag ('dt', get_string ('languages', 'codiana'));
+
             $allLanguaues = codiana_get_supported_languages ();
-            $languages = explode (',', $this->codiana->languages);
+            $languages    = explode (',', $this->codiana->languages);
             foreach ($languages as $language) {
                 $output .= html_writer::tag ('dd', sprintf ('%s (*.%s)', $allLanguaues[$language], $language));
             }
+            $format = get_string ("view:mainfilename:warning", "codiana");
+            $name   = html_writer::tag ('em', $this->codiana->mainfilename);
+            $output .= html_writer::tag ('dt', sprintf ($format, $name), array ('class' => 'error generalbox'));
         }
         $output .= html_writer::end_tag ('dl');
         return $output;
-    }
-
-
-
-    /**
-     * @return string
-     */
-    private function view_mainfile_warning () {
-        $output = '';
-        $output .= sprintf (
-            get_string ("codiana:view:mainfilename:warning", "codiana"),
-            html_writer::tag ("span", $this->codiana->mainfilename, array ('class' => 'codiana_mainfilename_warning'))
-        );
-        return $this->view_block ($output, 'generalbox');
     }
 
 

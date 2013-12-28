@@ -49,69 +49,67 @@ defined ('MOODLE_INTERNAL') || die ();
 // TODO add guest restricted area (cap 'view')
 $capabilities = array (
     //# ----- capability to create new instance of codiana -----------------------------------------
-    'mod/codiana:addinstance' => array (
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array (
+    'mod/codiana:addinstance'     => array (
+        'riskbitmask'          => RISK_XSS,
+        'captype'              => 'write',
+        'contextlevel'         => CONTEXT_COURSE,
+        'archetypes'           => array (
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         ),
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
     //# ----- capability to view students attempts -------------------------------------------------
-    'mod/codiana:viewmyattempts' => array (
-        'captype' => 'read',
+    'mod/codiana:viewmyattempts'  => array (
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
-            'student' => CAP_ALLOW,
+        'legacy'       => array (
+            'student'        => CAP_ALLOW,
             'editingteacher' => CAP_PREVENT,
-            'manager' => CAP_PREVENT
+            'manager'        => CAP_PREVENT
         )
     ),
     //# ----- capability to submit ones solution ---------------------------------------------------
-    'mod/codiana:submitsolution' => array (
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
+    'mod/codiana:submitsolution'  => array (
+        'riskbitmask'  => RISK_XSS,
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
-            'student' => CAP_ALLOW,
+        'legacy'       => array (
+            'student'        => CAP_ALLOW,
             'editingteacher' => CAP_PREVENT,
-            'manager' => CAP_PREVENT
+            'manager'        => CAP_PREVENT
         )
     ),
-
-
     //# ----- capability to view results -----------------------------------------------------------
-    'mod/codiana:viewresults' => array (
-        'captype' => 'read',
+    'mod/codiana:viewresults'     => array (
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
+        'legacy'       => array (
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     ),
     //# ----- capability to manage task files (input, proto, ...) ----------------------------------
     'mod/codiana:managetaskfiles' => array (
-        'riskbitmask' => RISK_XSS,
-        'captype' => 'write',
+        'riskbitmask'  => RISK_XSS,
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
+        'legacy'       => array (
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     ),
     //# ----- capability to have higher priority in queue ------------------------------------------
     //# ----- capability to have unlimited number of attempts --------------------------------------
     //# ----- capability to see all results --------------------------------------------------------
-    'mod/codiana:manager' => array (
-        'captype' => 'read',
+    'mod/codiana:manager'         => array (
+        'captype'      => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array (
-            'student' => CAP_PREVENT,
+        'legacy'       => array (
+            'student'        => CAP_PREVENT,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     ),
 );

@@ -52,7 +52,7 @@ require_login ($course, false, $cm);
 
 // ----- CAPABILITY submitsolution ----------------------------------------------------------------
 $context = context_module::instance ($cm->id);
-require_capability('mod/codiana:submitsolution', $context);
+require_capability ('mod/codiana:submitsolution', $context);
 
 // clean-up URL
 $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $cm->id));
@@ -68,16 +68,20 @@ global $OUTPUT;
 
 
 // grap total attempts and max attempts
-$totalAttempts = $DB->count_records ('codiana_attempt', array ('userid' => $USER->id, 'taskid' => $codiana->id));
-$maxAttempts = $DB->get_field ('codiana', 'maxattempts', array ('id' => $codiana->id), MUST_EXIST);
-$canSubmit = $totalAttempts < $maxAttempts || has_capability ('mod/codiana:manager', $context);
-$lastAttempt = codiana_get_last_attempt ($codiana, $USER->id);
-$warning = $totalAttempts > 0 && $lastAttempt->state == codiana_state::WAITINGTOPROCESS;
+$totalAttempts = codiana_get_user_attempt_count ($codiana, $USER->id);
+$maxAttempts   = $codiana->maxattempts;
+$canSubmit     = $totalAttempts < $maxAttempts || has_capability ('mod/codiana:manager', $context);
+$lastAttempt   = codiana_get_last_attempt ($codiana, $USER->id);
+$warning       = $totalAttempts > 0 && $lastAttempt->state == codiana_attempt_state::WAITING_TO_PROCESS;
+
+// grap total user count in this task
+$totalUsers = codiana_get_user_count ($codiana, $USER->id);
+$maxUsers   = $codiana->maxusers;
 
 
 if (!$canSubmit) {
     echo $OUTPUT->header ();
-    echo html_writer::tag ('h1', 'No more attempts');
+    echo html_writer::tag ('h1', 'No more attempts' . " ($totalAttempts / $maxAttempts)");
     echo html_writer::tag ('p', 'You have reached limit of maximum possible attempts.');
     echo $OUTPUT->footer ();
 
@@ -109,19 +113,19 @@ if (!$canSubmit) {
 
         // save solution
         $data = array (
-            'priority' => has_capability ('mod/codiana:manager', $context) ? 100 : 0,
+            'priority'    => has_capability ('mod/codiana:manager', $context) ? 100 : 0,
             'elementName' => 'sourcefile',
-            'attempt' => $totalAttempts + 1,
-            'type' => codiana_queue_type::SOLUTION_CHECK
+            'attempt'     => $totalAttempts + 1,
+            'type'        => codiana_queue_type::SOLUTION_CHECK
         );
         codiana_save_user_solution ($codiana, $USER->id, $mform, $data);
 
 
         if ($warning) {
             // set state to aborted (last attempt) and delete any users queue items
-            $lastAttempt->state = codiana_state::ABORTED;
+            $lastAttempt->state = codiana_attempt_state::PROCESS_ABORTED;
             $DB->update_record ('codiana_attempt', $lastAttempt);
-            $DB->delete_records('codiana_queue', array ('userid' => $USER->id));
+            $DB->delete_records ('codiana_queue', array ('userid' => $USER->id));
         }
 
         // redirect user to view
@@ -136,7 +140,7 @@ if (!$canSubmit) {
         $mform->display ($codiana, $cm, $course);
 
         if ($warning)
-            echo html_writer::tag ('h4', get_string ('codiana:abortedsolution:warning', 'codiana'));
+            echo html_writer::tag ('h4', get_string ('abortedsolution:warning', 'codiana'));
     }
 
 

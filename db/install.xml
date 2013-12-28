@@ -29,6 +29,7 @@
         <FIELD NAME="limitmemorynothing" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The value threshold in kB after which is classification zero, zero points awarded"/>
         <FIELD NAME="inputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Input example"/>
         <FIELD NAME="outputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Output example"/>
+        <FIELD NAME="inputgenerator" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON input generator"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

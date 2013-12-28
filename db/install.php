@@ -33,12 +33,12 @@ function xmldb_codiana_install () {
     global $CFG, $DB;
 
     $javaLanguage = array (
-        'name' => 'Java',
+        'name'      => 'Java',
         'extension' => 'java'
     );
 
     $pythonLanguage = array (
-        'name' => 'Python',
+        'name'      => 'Python',
         'extension' => 'py'
     );
 

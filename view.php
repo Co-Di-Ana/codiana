@@ -30,16 +30,16 @@ require_once (dirname (dirname (dirname (__FILE__))) . '/config.php');
 require_once (dirname (__FILE__) . '/lib.php');
 
 $id = optional_param ('id', 0, PARAM_INT); // course_module ID, or
-$c = optional_param ('n', 0, PARAM_INT); // codiana instance ID - it should be named as the first character of the module
+$c  = optional_param ('n', 0, PARAM_INT); // codiana instance ID - it should be named as the first character of the module
 
 if ($id) {
-    $cm = get_coursemodule_from_id ('codiana', $id, 0, false, MUST_EXIST);
-    $course = $DB->get_record ('course', array ('id' => $cm->course), '*', MUST_EXIST);
+    $cm      = get_coursemodule_from_id ('codiana', $id, 0, false, MUST_EXIST);
+    $course  = $DB->get_record ('course', array ('id' => $cm->course), '*', MUST_EXIST);
     $codiana = $DB->get_record ('codiana', array ('id' => $cm->instance), '*', MUST_EXIST);
 } elseif ($c) {
     $codiana = $DB->get_record ('codiana', array ('id' => $c), '*', MUST_EXIST);
-    $course = $DB->get_record ('course', array ('id' => $codiana->course), '*', MUST_EXIST);
-    $cm = get_coursemodule_from_instance ('codiana', $codiana->id, $course->id, false, MUST_EXIST);
+    $course  = $DB->get_record ('course', array ('id' => $codiana->course), '*', MUST_EXIST);
+    $cm      = get_coursemodule_from_instance ('codiana', $codiana->id, $course->id, false, MUST_EXIST);
 } else {
     error ('You must specify a course_module ID or an instance ID');
 }
@@ -55,10 +55,10 @@ $PAGE->set_url ('/mod/codiana/view.php', array ('id' => $cm->id));
 $PAGE->set_title (format_string ($codiana->name));
 $PAGE->set_heading (format_string ($course->fullname));
 $PAGE->set_context ($context);
-$PAGE->requires->css('/mod/codiana/html/css/view.css');
+$PAGE->requires->css ('/mod/codiana/html/css/view.css');
 //$PAGE->requires->jquery ();
-/** @var mod_codiana_renderer  */
-$output = $PAGE->get_renderer('mod_codiana');
+/** @var mod_codiana_renderer */
+$output = $PAGE->get_renderer ('mod_codiana');
 
 // other things you may want to set - remove if not needed
 //$PAGE->set_cacheable(false);
@@ -76,7 +76,7 @@ $output = $PAGE->get_renderer('mod_codiana');
 // Output starts here
 echo $OUTPUT->header ();
 
-$output->init ($codiana, $cm, $context, array(), $course);
+$output->init ($codiana, $cm, $context, array (), $course);
 echo $output->view_page_guest ();
 
 // Finish the page

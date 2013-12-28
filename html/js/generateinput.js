@@ -452,25 +452,6 @@ $ (function () {
         update ();
     });
 
-    mainSection.count = 1;
-    var initSection = new GeneratorSection ('inicializace', 4, []);
-    mainSection.add (initSection);
-    mainSection.add (new GeneratorNewLine ());
-    var compSection = new GeneratorSection ('priklady', 10, []);
-    mainSection.add (compSection);
-
-    initSection.add (new GeneratorVariableStep ('identifikator', 1, 1, '%02d'));
-    initSection.add (new GeneratorString (' '));
-    initSection.add (new GeneratorVariableRandom ('hodiny', 0, 23, '%02d'));
-    initSection.add (new GeneratorString (':'));
-    initSection.add (new GeneratorVariableRandom ('minuty', 0, 59, '%02d'));
-    initSection.add (new GeneratorNewLine ());
-
-    compSection.add (new GeneratorVariableRandom ('cas-A-id', 1, 4, '%02d'));
-    compSection.add (new GeneratorString (' + '));
-    compSection.add (new GeneratorVariableRandom ('cas-B-id', 1, 4, '%02d'));
-    compSection.add (new GeneratorNewLine ());
-
     // initial selection
     $ ('#new-element input:radio').first ().prop ('checked', true).trigger ('change');
 
@@ -479,6 +460,48 @@ $ (function () {
         if (~censored.indexOf (key))
             return undefined;
         return value;
+    }
+
+    var json = $ ('#codiana_generator_data').html ();
+    if (json.length == 0) {
+        mainSection.count = 1;
+        var initSection = new GeneratorSection ('inicializace', 4, []);
+        mainSection.add (initSection);
+        mainSection.add (new GeneratorNewLine ());
+        var compSection = new GeneratorSection ('priklady', 10, []);
+        mainSection.add (compSection);
+
+        initSection.add (new GeneratorVariableStep ('identifikator', 1, 1, '%02d'));
+        initSection.add (new GeneratorString (' '));
+        initSection.add (new GeneratorVariableRandom ('hodiny', 0, 23, '%02d'));
+        initSection.add (new GeneratorString (':'));
+        initSection.add (new GeneratorVariableRandom ('minuty', 0, 59, '%02d'));
+        initSection.add (new GeneratorNewLine ());
+
+        compSection.add (new GeneratorVariableRandom ('cas-A-id', 1, 4, '%02d'));
+        compSection.add (new GeneratorString (' + '));
+        compSection.add (new GeneratorVariableRandom ('cas-B-id', 1, 4, '%02d'));
+        compSection.add (new GeneratorNewLine ());
+    } else {
+        var parse = function (o) {
+            switch (o.core.type) {
+                case 'variable-step':
+                    return new GeneratorVariableStep (o.core.id, o.start, o.step, o.core.format);
+                case 'variable-random':
+                    return new GeneratorVariableRandom (o.core.id, o.min, o.max, o.core.format);
+                case 'string':
+                    return new GeneratorString (o.core.id);
+                case 'new-line':
+                    return new GeneratorNewLine ();
+                case 'section':
+                    var section = new GeneratorSection (o.core.id, o.count, []);
+                    for (var i = 0; i < o.items.length; i++)
+                        section.add (parse (o.items[i]));
+                    return section;
+            }
+        }
+        mainSection = parse (JSON.parse (json));
+        selectedSection = mainSection;
     }
 
     update ();

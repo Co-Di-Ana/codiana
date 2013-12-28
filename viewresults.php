@@ -30,7 +30,9 @@ require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
 global $DB;
 
 // grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
+$id      = optional_param ('id', 0, PARAM_INT);
+$showAll = optional_param ('all', '0', PARAM_INT);
+$showAll = $showAll == 1;
 
 // try to find right module or throw error
 if ($id) {
@@ -50,12 +52,12 @@ if ($id) {
 // check login and grap context
 require_login ($course, false, $cm);
 
-// ----- CAPABILITY viewmyattempts ----------------------------------------------------------------
+// ----- CAPABILITY viewresults ----------------------------------------------------------------
 $context = context_module::instance ($cm->id);
-require_capability ('mod/codiana:viewmyattempts', $context);
+require_capability ('mod/codiana:viewresults', $context);
 
 // clean-up URL
-$url = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $cm->id));
+$url = new moodle_url('/mod/codiana/viewresults.php', array ('id' => $cm->id));
 $PAGE->set_url ($url);
 $PAGE->set_title ('My modules page title');
 $PAGE->set_heading ('My modules page heading');
@@ -69,28 +71,8 @@ global $OUTPUT;
 
 //# ----- OUTPUT ----------------------------------------------------------------
 
-
-
-// manager gets all fields
-if (has_capability ('mod/codiana:manager', $context)) {
-    $fields = codiana_display_options::$fields;
-} else {
-    $fields = codiana_get_task_fields (
-        $codiana, codiana_is_task_open ($codiana) ?
-        codiana_display_options::OPEN_SOLVER :
-        codiana_display_options::CLOSE_SOLVER);
-}
-
-$mysqlFields = codiana_expand_fields ($fields);
-// user do not need to see their own username
-unset ($mysqlFields['username']);
-
-// grab results
-$allAttempts  = codiana_get_user_all_attempts ($codiana, $USER->id, $mysqlFields);
-$gradeAttempt = codiana_get_user_grade_attempt ($codiana, $USER->id, $mysqlFields);
-
-
+$attempts = $showAll ? codiana_get_task_all_attempts ($codiana) : codiana_get_task_grade_attempts ($codiana);
 
 echo $OUTPUT->header ();
-echo $output->view_page_viewmyattempts ($gradeAttempt, $allAttempts);
+echo $output->view_page_viewresults ($attempts, $showAll);
 echo $OUTPUT->footer ();

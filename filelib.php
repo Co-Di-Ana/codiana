@@ -140,8 +140,8 @@ class RemoteFileTransfer implements IFileTransfer {
 
     /** @var stdClass */
     private $config = array (
-        'host' => 'codiana.nti.tul.cz',
-        'port' => 22,
+        'host'     => 'codiana.nti.tul.cz',
+        'port'     => 22,
 
         'username' => 'root',
         'password' => ''
@@ -201,8 +201,8 @@ class RemoteFileTransfer implements IFileTransfer {
         if ($result == false)
             fclose ($tmpFile);
 
-        $info = stream_get_meta_data ($tmpFile);
-        $uri = $info['uri'];
+        $info   = stream_get_meta_data ($tmpFile);
+        $uri    = $info['uri'];
         $result = ssh2_scp_send ($this->session, $uri, $path);
         fclose ($tmpFile);
 
@@ -218,8 +218,8 @@ class RemoteFileTransfer implements IFileTransfer {
         if ($tmpFile == false)
             throw new Exception ('Cannot create temp file');
 
-        $info = stream_get_meta_data ($tmpFile);
-        $uri = $info['uri'];
+        $info   = stream_get_meta_data ($tmpFile);
+        $uri    = $info['uri'];
         $result = ssh2_scp_recv ($this->session, $path, $uri);
         if ($result == false)
             throw new Exception ('Error recieving file from server');
@@ -227,7 +227,7 @@ class RemoteFileTransfer implements IFileTransfer {
         $result = file_get_contents ($uri, FILE_BINARY);
         fclose ($tmpFile);
         if ($result == false)
-            throw new moodle_exception ('codiana:error:filedoesnotexists', 'codiana');
+            throw new moodle_exception ('error:filedoesnotexists', 'codiana');
 
         return $result;
     }
@@ -319,9 +319,8 @@ class LocalFileTransfer implements IFileTransfer {
 
 
     public function copyFile ($originalLocation, $finalLocation) {
-        $result = $this->mkDir (dirname ($finalLocation));
-        $result &= @copy ($originalLocation, $finalLocation);
-        return $result;
+        $this->mkDir (dirname ($finalLocation));
+        return @copy ($originalLocation, $finalLocation);
     }
 
 

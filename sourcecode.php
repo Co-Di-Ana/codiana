@@ -29,8 +29,8 @@ require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 global $DB;
 
 // grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
-$userid = optional_param ('userid', 0, PARAM_INT);
+$id      = optional_param ('id', 0, PARAM_INT);
+$userid  = optional_param ('userid', 0, PARAM_INT);
 $ordinal = optional_param ('ordinal', 0, PARAM_INT);
 
 // try to find right module or throw error
@@ -54,7 +54,7 @@ $context = context_module::instance ($cm->id);
 
 // Check the contextlevel is as expected - if your plugin is a block, this becomes CONTEXT_BLOCK, etc.
 if ($context->contextlevel != CONTEXT_MODULE) {
-    print_error ('codiana:error:youcannotdownloadthisfile', 'codiana');
+    print_error ('error:youcannotdownloadthisfile', 'codiana');
 }
 
 // check login and grap context
@@ -65,17 +65,17 @@ require_login ($course, false, $cm);
 $url = new moodle_url(
     '/mod/codiana/sourcecode.php',
     array (
-          'id' => $cm->id,
-          'userid' => $userid,
+          'id'      => $cm->id,
+          'userid'  => $userid,
           'ordinal' => $ordinal
     )
 );
 
 // TODO create function
-$isOpen = codiana_is_task_open ($codiana);
-$isSolver = $USER->id == $userid;
-$shift = codiana_get_task_state ($isOpen, $isSolver);
-$settings = $codiana->settings;
+$isOpen    = codiana_is_task_open ($codiana);
+$isSolver  = $USER->id == $userid;
+$shift     = codiana_get_task_state ($isOpen, $isSolver);
+$settings  = $codiana->settings;
 $codeIndex = array_search ('code', codiana_display_options::$fields) * codiana_display_options::COUNT;
 $codeIndex += $shift;
 $hasPermission = $settings & (1 << $codeIndex);
@@ -83,14 +83,14 @@ $hasPermission = $settings & (1 << $codeIndex);
 
 // throw error if user doesn't have sufficient permissions
 if (!$hasPermission)
-    print_error ('codiana:error:youcannotdownloadthisfile', 'codiana');
+    print_error ('error:youcannotdownloadthisfile', 'codiana');
 
 
 // grap file transfer
-$files = codiana_get_file_transfer ();
+$files    = codiana_get_file_transfer ();
 $filePath = codiana_get_user_file_path ($codiana, codiana_file_path_type::USER_PREVIOUS_ZIP, $userid, $ordinal);
-if (!$files->exists($filePath))
-    print_error('codiana:error:filedoesnotexists', 'codiana');
+if (!$files->exists ($filePath))
+    print_error ('error:filedoesnotexists', 'codiana');
 
 // get content
 $content = $files->loadFile ($filePath);
@@ -102,5 +102,5 @@ fwrite ($tmpFile, $content);
 
 // finally, send file to user
 $info = stream_get_meta_data ($tmpFile);
-$uri = $info['uri'];
+$uri  = $info['uri'];
 send_file ($uri, "$codiana->mainfilename.zip");

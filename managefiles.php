@@ -52,7 +52,7 @@ require_login ($course, false, $cm);
 
 // ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
 $context = context_module::instance ($cm->id);
-require_capability('mod/codiana:managetaskfiles', $context);
+require_capability ('mod/codiana:managetaskfiles', $context);
 
 // clean-up URL
 $url = new moodle_url('/mod/codiana/managefiles.php', array ('id' => $cm->id));

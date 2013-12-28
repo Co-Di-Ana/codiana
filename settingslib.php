@@ -72,7 +72,7 @@ class admin_setting_configmulticheckbox_base extends admin_setting_configmultich
             return 0;
         }
         $result = 0;
-        $i = $this->shift;
+        $i      = $this->shift;
         foreach ($this->choices as $key => $unused) {
             if (!empty($data[$key]))
                 $result += 1 << $i;
@@ -99,7 +99,7 @@ class admin_setting_configmulticheckbox_base extends admin_setting_configmultich
         }
 
         $setting = array ();
-        $i = $this->shift;
+        $i       = $this->shift;
         foreach ($this->choices as $key => $unused) {
             if ($result & (1 << $i))
                 $setting[$key] = 0;
@@ -147,7 +147,7 @@ class admin_setting_configmulticheckbox_base extends admin_setting_configmultich
         if (is_null ($data)) {
             $data = array ();
         }
-        $options = array ();
+        $options  = array ();
         $defaults = array ();
 
         $result = intval ($data);
@@ -164,7 +164,7 @@ class admin_setting_configmulticheckbox_base extends admin_setting_configmultich
             }
 
             $options[] = '<input type="checkbox" id="' . $this->get_id () . '_' . $key . '" name="' . $this->get_full_name () . '[' . $key . ']" value="1" ' . $checked . ' />'
-                . '<label for="' . $this->get_id () . '_' . $key . '">' . highlightfast ($query, $description) . '</label>';
+                         . '<label for="' . $this->get_id () . '_' . $key . '">' . highlightfast ($query, $description) . '</label>';
             $i += $this->step;
         }
 
@@ -218,10 +218,10 @@ class admin_setting_configmulticheckbox_base_group extends admin_setting {
 
 
     public function __construct ($name, $visiblename, $description, $defaultsetting, $choices, $step = codiana_display_options::COUNT) {
-        $this->choices = $choices;
-        $this->rawName = $name;
+        $this->choices        = $choices;
+        $this->rawName        = $name;
         $this->defaultSetting = $defaultsetting;
-        $this->step = $step;
+        $this->step           = $step;
         parent::__construct ($name, $visiblename, $description, $defaultsetting);
     }
 
@@ -239,8 +239,8 @@ class admin_setting_configmulticheckbox_base_group extends admin_setting {
 
         // recreate choices array but with shifted indexes
         // defaults is array where key is index and value is whether is selected or not
-        $i = $shift;
-        $j = 0;
+        $i        = $shift;
+        $j        = 0;
         $defaults = array ();
         foreach ($this->choices as $value) {
             $choices[$this->index++] = $value;

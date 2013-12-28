@@ -52,7 +52,7 @@ require_login ($course, false, $cm);
 
 // ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
 $context = context_module::instance ($cm->id);
-require_capability('mod/codiana:managetaskfiles', $context);
+require_capability ('mod/codiana:managetaskfiles', $context);
 
 // clean-up URL
 $url = new moodle_url('/mod/codiana/generateinput.php', array ('id' => $cm->id));
@@ -60,11 +60,11 @@ $PAGE->set_url ($url);
 $PAGE->set_title ('Submit solution');
 $PAGE->set_heading ("Submitting solution to '$codiana->name'");
 $PAGE->set_pagelayout ('standard');
-$PAGE->requires->jquery();
-$PAGE->requires->js('/mod/codiana/html/js/sprintf.min.js', true);
-$PAGE->requires->js('/mod/codiana/html/js/generateinput.js', true);
-$PAGE->requires->css('/mod/codiana/html/css/generateinput.css');
-$PAGE->requires->css('/mod/codiana/html/css/view.css');
+$PAGE->requires->jquery ();
+$PAGE->requires->js ('/mod/codiana/html/js/sprintf.min.js', true);
+$PAGE->requires->js ('/mod/codiana/html/js/generateinput.js', true);
+$PAGE->requires->css ('/mod/codiana/html/css/generateinput.css');
+$PAGE->requires->css ('/mod/codiana/html/css/view.css');
 global $OUTPUT;
 
 
@@ -82,10 +82,15 @@ if ($mform->is_cancelled ()) {
     $result = codiana_generate_input ($codiana);
 
     if ($result != null)
-        echo $result->renderAll();
-    else
-        echo codiana_message::create('filegenerated', 'success')->renderAll();
+        echo $result->renderAll ();
+    else {
+        echo codiana_message::create ('filegenerated', 'success')->renderAll ();
+        $codiana->inputgenerator = codiana_generator_parser::$json;
+        $DB->update_record ('codiana', $codiana);
+    }
+
 }
-$mform->display();
+$mform->display ();
+echo html_writer::tag ('div', $codiana->inputgenerator, array ('style' => 'display: none;', 'id' => 'codiana_generator_data'));
 
 echo $OUTPUT->footer ();

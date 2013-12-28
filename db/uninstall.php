@@ -26,7 +26,7 @@
 /**
  * Custom uninstallation procedure
  */
-function xmldb_codiana_uninstall() {
+function xmldb_codiana_uninstall () {
     // TODO remove old folders (? also SSH)
     return true;
 }
