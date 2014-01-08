@@ -826,13 +826,10 @@ function codiana_save_user_solution ($task, $userID, $mform, $data) {
     $fileTransfer = codiana_get_file_transfer ();
 
     // delete old solution and recreate folder
-    if (!$fileTransfer->deleteDir ($currentFolder) && $fileTransfer->exists ($currentFolder))
+    if (!$fileTransfer->deleteDir ($currentFolder))
         throw new moodle_exception ('error:cannotdeletefolder', 'codiana');
-    if ((!$fileTransfer->mkDir ($currentFolder) && !$fileTransfer->exists ($currentFolder)) ||
-        (!$fileTransfer->mkDir ($previousFolder) && !$fileTransfer->exists ($previousFolder))
-    ) {
+    if (!$fileTransfer->mkDir ($currentFolder) || !$fileTransfer->mkDir ($previousFolder))
         throw new moodle_exception ('error:cannotcreatefolder', 'codiana');
-    }
 
     // save new solution
     if (!$fileTransfer->saveFile ($content, $solutionFile))

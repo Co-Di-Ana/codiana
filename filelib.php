@@ -344,12 +344,14 @@ class LocalFileTransfer implements IFileTransfer {
                 (@is_dir ("$path/$file")) ? $this->deleteDir ("$path/$file") : unlink ("$path/$file");
             return @rmdir ($path);
         }
+        return !@file_exists ($path);
     }
 
 
 
     public function mkDir ($location) {
-        return @mkdir ($location, 0777, true);
+        @mkdir ($location, 0777, true);
+        return @file_exists ($location);
     }
 
 
