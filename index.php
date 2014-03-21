@@ -27,7 +27,9 @@
  */
 
 /// Replace codiana with the name of your module and remove this line
-
+echo '<pre>';
+print_r ('csa');
+die ();
 require_once (dirname (dirname (dirname (__FILE__))) . '/config.php');
 require_once (dirname (__FILE__) . '/lib.php');
 

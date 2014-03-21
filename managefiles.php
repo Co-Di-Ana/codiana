@@ -29,23 +29,13 @@ require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
 
 global $DB;
 
-// grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
+// TODO insert into queue after input exists?
+// TODO rename after activation/open Warning
+// TODO grade.php uzivatel permission
+// TODO schovat cestu v error hlašení
 
-// try to find right module or throw error
-if ($id) {
-    if (!$cm = get_coursemodule_from_id ('codiana', $id)) {
-        print_error ('invalidcoursemodule');
-    }
-    if (!$course = $DB->get_record ('course', array ('id' => $cm->course))) {
-        print_error ('coursemisconf');
-    }
-    if (!$codiana = $DB->get_record ('codiana', array ('id' => $cm->instance))) {
-        print_error ('invalidcoursemodule');
-    }
-} else {
-    print_error ('invalidcoursemodule');
-}
+// grab course, context and codiana instance
+list($cm, $course, $codiana) = codiana_get_from_id ();
 
 // check login and grap context
 require_login ($course, false, $cm);
@@ -57,8 +47,8 @@ require_capability ('mod/codiana:managetaskfiles', $context);
 // clean-up URL
 $url = new moodle_url('/mod/codiana/managefiles.php', array ('id' => $cm->id));
 $PAGE->set_url ($url);
-$PAGE->set_title ('My modules page title');
-$PAGE->set_heading ('My modules page heading');
+$PAGE->set_title (codiana_string ('title:manage_files'));
+$PAGE->set_heading (codiana_create_page_title($codiana, 'title:manage_files'));
 $PAGE->set_pagelayout ('standard');
 $output = $PAGE->get_renderer ('mod_codiana');
 $output->init ($codiana, $cm, $context, $course);
@@ -67,7 +57,7 @@ global $OUTPUT;
 
 
 echo $OUTPUT->header ();
-echo html_writer::tag ('h2', sprintf ('Managing file (%s)', $codiana->name));
+echo html_writer::tag ('h2', codiana_string ('title:managefilex', $codiana->name));
 $mform = new mod_codiana_managefiles_form ($codiana, $url);
 
 
@@ -76,7 +66,6 @@ if ($mform->is_cancelled ()) {
     // form canceled
 } else if ($data = $mform->get_data ()) {
     // form is valid, now file check
-
     // file extension support check
     $messages = $mform->validateFiles ();
     echo codiana_message::renderItems ($messages, codiana_message::create ('noactionperformed', 'error'));

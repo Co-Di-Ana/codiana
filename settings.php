@@ -45,7 +45,7 @@ $settings->add (
         'codiana/limitmemory',
         get_string ('setting:limitmemory', 'codiana'),
         get_string ('setting:limitmemory_desc', 'codiana'),
-        100, PARAM_INT, 4
+        500000, PARAM_INT, 4
     )
 );
 
@@ -75,7 +75,7 @@ $settings->add (
         'codiana/storagepath',
         get_string ('setting:storagepath', 'codiana'),
         get_string ('setting:storagepath_desc', 'codiana'),
-        '/var/codiana/data', PARAM_TEXT, 100
+        '/home/codiana/data/', PARAM_TEXT, 100
     )
 );
 
@@ -99,32 +99,64 @@ $settings->add (
     )
 );
 
+// -----------------------------------------------------------------------------
+// ----- JAVA LOCATION ---------------------------------------------------------
+// -----------------------------------------------------------------------------
+$settings->add (
+    new admin_setting_configtext(
+        'codiana/javaip',
+        get_string ('setting:javaip', 'codiana'),
+        get_string ('setting:javaip_desc', 'codiana'),
+        '127.0.0.1', PARAM_HOST, 30
+    )
+);
+$settings->add (
+    new admin_setting_configtext(
+        'codiana/javaport',
+        get_string ('setting:javaport', 'codiana'),
+        get_string ('setting:javaport_desc', 'codiana'),
+        '14700', PARAM_INT, 30
+    )
+);
+$settings->add (
+    new admin_setting_configtext(
+        'codiana/javamessage',
+        get_string ('setting:javamessage', 'codiana'),
+        get_string ('setting:javamessage_desc', 'codiana'),
+        'codiana.check', PARAM_TEXT, 30
+    )
+);
+
+
+// -----------------------------------------------------------------------------
+// ----- TASK DEFAULT SETTINGS -------------------------------------------------
+// -----------------------------------------------------------------------------
 $group = new admin_setting_configmulticheckbox_base_group(
     'codiana/setting',
     'Setting',
     'settings',
-    '174847',
+    '240383',
     codiana_display_options::$fields
 );
 
 $group->add (
-    'Active task and solver',
-    'popis',
+    codiana_string ('settings:open_solver'),
+    codiana_string ('settings:open_solver_desc'),
     codiana_display_options::OPEN_SOLVER
 );
 $group->add (
-    'Task over and solver',
-    'popis',
+    codiana_string ('settings:close_solver'),
+    codiana_string ('settings:close_solver_desc'),
     codiana_display_options::CLOSE_SOLVER
 );
 $group->add (
-    'Active task and others',
-    'popis',
+    codiana_string ('settings:active_others'),
+    codiana_string ('settings:active_others_desc'),
     codiana_display_options::OPEN_OTHERS
 );
 $group->add (
-    'Task over and others',
-    'popis',
+    codiana_string ('settings:close_others'),
+    codiana_string ('settings:close_others_desc'),
     codiana_display_options::CLOSE_OTHERS
 );
 

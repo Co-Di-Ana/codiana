@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/codiana/db" VERSION="20131129" COMMENT="XMLDB file for Moodle mod/codiana"
+<XMLDB PATH="mod/codiana/db" VERSION="20140228" COMMENT="XMLDB file for Moodle mod/codiana"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -9,6 +9,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course codiana activity belongs to"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Task name for codiana instance"/>
+        <FIELD NAME="state" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="2" SEQUENCE="false" COMMENT="Task state active not active"/>
         <FIELD NAME="mainfilename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the main class file. Startup class name."/>
         <FIELD NAME="settings" TYPE="char" LENGTH="256" NOTNULL="true" SEQUENCE="false" COMMENT="Task view settings"/>
         <FIELD NAME="difficulty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="3" SEQUENCE="false" COMMENT="Difficulty of the task. 1 is easy 5 is hard."/>
@@ -30,6 +31,8 @@
         <FIELD NAME="inputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Input example"/>
         <FIELD NAME="outputexample" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Output example"/>
         <FIELD NAME="inputgenerator" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON input generator"/>
+        <FIELD NAME="plagscheckstate" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="State of plagiarism detection process"/>
+		<FIELD NAME="plagstimecheck" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When was plag check performed."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -66,6 +69,8 @@
         <FIELD NAME="resultmemory" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Percentage value of program memory stress"/>
         <FIELD NAME="resultfinal" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Final result"/>
         <FIELD NAME="resultnote" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Optional note to the result, may contain error description"/>
+        <FIELD NAME="plagscheckstate" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="1" SEQUENCE="false" COMMENT="State of plagiarism detection process"/>
+		<FIELD NAME="plagstimecheck" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When was plag check performed."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -78,6 +83,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="taskid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Codiana instance (task) unique id"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of a user who made this request"/>
+        <FIELD NAME="detailid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="id of check_plag item"/>
         <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="id of a users attempt if type of request is solution check, otherwise null value"/>
         <FIELD NAME="type" TYPE="int" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="Type of a request - solution (0) or plagiarism (1)"/>
         <FIELD NAME="priority" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Request priority"/>
@@ -86,6 +92,19 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="taskid" TYPE="foreign" FIELDS="taskid" REFTABLE="codiana" REFFIELDS="id" COMMENT="FK of codiana instance"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="user FK"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="codiana_plags" COMMENT="table containing all plags (ducplicated solution pairs)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="18" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="taskid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="firstid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="secondid" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="result" TYPE="int" LENGTH="9" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="details" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

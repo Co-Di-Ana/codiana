@@ -31,36 +31,31 @@ global $DB;
 
 // grab course, context and codiana instance
 list($cm, $course, $codiana) = codiana_get_from_id ();
-
-$showAll = optional_param ('all', '0', PARAM_INT);
-$showAll = $showAll == 1;
+$activate = required_param ('activate', PARAM_INT);
 
 // check login and grap context
 require_login ($course, false, $cm);
 
-// ----- CAPABILITY viewresults ----------------------------------------------------------------
-
+// ----- CAPABILITY submitsolution ----------------------------------------------------------------
 $context = context_module::instance ($cm->id);
-require_capability ('mod/codiana:viewresults', $context);
+require_capability ('mod/codiana:manager', $context);
 
-// clean-up URL
-$url = new moodle_url('/mod/codiana/viewresults.php', array ('id' => $cm->id));
-$PAGE->set_url ($url);
-$PAGE->set_title (codiana_string ('title:view_all_attempts'));
-$PAGE->set_heading (codiana_create_page_title ($codiana, 'title:view_all_attempts'));
-$PAGE->set_pagelayout ('standard');
-$output = $PAGE->get_renderer ('mod_codiana');
-$output->init ($codiana, $cm, $context, $course);
-global $OUTPUT;
+// if we want to activate the task, files must be ok
+if ($activate) {
+    $files = (object)codiana_get_files_status ($codiana);
+    if (!$files->input && !$files->output)
+        redirect (new moodle_url('/mod/codiana/managefiles.php', array ('id' => $cm->id)), codiana_string ('warning:iofilesmissing'));
 
+    if (!$files->input)
+        redirect (new moodle_url('/mod/codiana/managefiles.php', array ('id' => $cm->id)), codiana_string ('warning:ifilesmissing'));
 
+    if (!$files->output)
+        redirect (new moodle_url('/mod/codiana/managefiles.php', array ('id' => $cm->id)), codiana_string ('warning:ofilesmissing'));
+}
 
+$codiana->state = $activate ? codiana_task_state::ACTIVE : codiana_task_state::NOT_ACTIVE;
+$task           = array ('id' => $codiana->id, 'state' => $codiana->state);
+$result         = codiana_set_task ($task);
+$message        = $activate ? codiana_string ('message:taskactivated') : codiana_string ('message:taskdeactivated');
 
-//# ----- OUTPUT ----------------------------------------------------------------
-
-$attempts = $showAll ? codiana_get_task_all_attempts ($codiana) : codiana_get_task_grade_attempts ($codiana);
-$plags    = codiana_get_task_plags ($codiana);
-
-echo $OUTPUT->header ();
-echo $output->view_page_viewresults ($attempts, $showAll, $plags);
-echo $OUTPUT->footer ();
+redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), $message);

@@ -30,7 +30,7 @@ global $DB;
 
 // grab course module id
 $id      = optional_param ('id', 0, PARAM_INT);
-$userid  = optional_param ('userid', 0, PARAM_INT);
+$userID  = optional_param ('userid', 0, PARAM_INT);
 $ordinal = optional_param ('ordinal', 0, PARAM_INT);
 
 // try to find right module or throw error
@@ -61,25 +61,15 @@ if ($context->contextlevel != CONTEXT_MODULE) {
 require_login ($course, false, $cm);
 
 
-// clean-up URL
-$url = new moodle_url(
-    '/mod/codiana/sourcecode.php',
-    array (
-          'id'      => $cm->id,
-          'userid'  => $userid,
-          'ordinal' => $ordinal
-    )
-);
-
 // TODO create function
 $isOpen    = codiana_is_task_open ($codiana);
-$isSolver  = $USER->id == $userid;
+$isSolver  = $USER->id == $userID;
 $shift     = codiana_get_task_state ($isOpen, $isSolver);
 $settings  = $codiana->settings;
 $codeIndex = array_search ('code', codiana_display_options::$fields) * codiana_display_options::COUNT;
 $codeIndex += $shift;
 $hasPermission = $settings & (1 << $codeIndex);
-
+$hasPermission |= has_capability('mod/codiana:manager', $context);
 
 // throw error if user doesn't have sufficient permissions
 if (!$hasPermission)
@@ -88,7 +78,7 @@ if (!$hasPermission)
 
 // grap file transfer
 $files    = codiana_get_file_transfer ();
-$filePath = codiana_get_user_file_path ($codiana, codiana_file_path_type::USER_PREVIOUS_ZIP, $userid, $ordinal);
+$filePath = codiana_get_user_file_path ($codiana, codiana_file_path_type::USER_PREVIOUS_ZIP, $userID, $ordinal);
 if (!$files->exists ($filePath))
     print_error ('error:filedoesnotexists', 'codiana');
 

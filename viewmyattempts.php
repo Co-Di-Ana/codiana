@@ -29,23 +29,8 @@ require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
 
 global $DB;
 
-// grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
-
-// try to find right module or throw error
-if ($id) {
-    if (!$cm = get_coursemodule_from_id ('codiana', $id)) {
-        print_error ('invalidcoursemodule');
-    }
-    if (!$course = $DB->get_record ('course', array ('id' => $cm->course))) {
-        print_error ('coursemisconf');
-    }
-    if (!$codiana = $DB->get_record ('codiana', array ('id' => $cm->instance))) {
-        print_error ('invalidcoursemodule');
-    }
-} else {
-    print_error ('invalidcoursemodule');
-}
+// grab course, context and codiana instance
+list($cm, $course, $codiana) = codiana_get_from_id ();
 
 // check login and grap context
 require_login ($course, false, $cm);
@@ -54,11 +39,21 @@ require_login ($course, false, $cm);
 $context = context_module::instance ($cm->id);
 require_capability ('mod/codiana:viewmyattempts', $context);
 
+// TODO dict
+// has task started
+if (!codiana_has_task_started ($codiana))
+    print_error ('error:tasknotstarted', 'codiana');
+
+// task not active
+if (!codiana_is_task_active ($codiana))
+    print_error ('error:tasknotactive', 'codiana');
+
+
 // clean-up URL
 $url = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $cm->id));
 $PAGE->set_url ($url);
-$PAGE->set_title ('My modules page title');
-$PAGE->set_heading ('My modules page heading');
+$PAGE->set_title (codiana_string ('title:view_my_attempts'));
+$PAGE->set_heading (codiana_create_page_title($codiana, 'title:view_my_attempts'));
 $PAGE->set_pagelayout ('standard');
 $output = $PAGE->get_renderer ('mod_codiana');
 $output->init ($codiana, $cm, $context, $course);
@@ -70,16 +65,15 @@ global $OUTPUT;
 //# ----- OUTPUT ----------------------------------------------------------------
 
 
-
 // manager gets all fields
-if (has_capability ('mod/codiana:manager', $context)) {
-    $fields = codiana_display_options::$fields;
-} else {
-    $fields = codiana_get_task_fields (
-        $codiana, codiana_is_task_open ($codiana) ?
-        codiana_display_options::OPEN_SOLVER :
-        codiana_display_options::CLOSE_SOLVER);
-}
+//if (has_capability ('mod/codiana:manager', $context)) {
+//    $fields = codiana_display_options::$fields;
+//} else {
+$fields = codiana_get_task_fields (
+    $codiana, codiana_is_task_open ($codiana) ?
+    codiana_display_options::OPEN_SOLVER :
+    codiana_display_options::CLOSE_SOLVER);
+//}
 
 $mysqlFields = codiana_expand_fields ($fields);
 // user do not need to see their own username
@@ -88,7 +82,6 @@ unset ($mysqlFields['username']);
 // grab results
 $allAttempts  = codiana_get_user_all_attempts ($codiana, $USER->id, $mysqlFields);
 $gradeAttempt = codiana_get_user_grade_attempt ($codiana, $USER->id, $mysqlFields);
-
 
 
 echo $OUTPUT->header ();

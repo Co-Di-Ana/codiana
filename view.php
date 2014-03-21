@@ -26,23 +26,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once (dirname (dirname (dirname (__FILE__))) . '/config.php');
-require_once (dirname (__FILE__) . '/lib.php');
+require_once (dirname (__FILE__) . '/../../config.php');
+require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
+require_once ($CFG->libdir . '/gradelib.php');
 
-$id = optional_param ('id', 0, PARAM_INT); // course_module ID, or
-$c  = optional_param ('n', 0, PARAM_INT); // codiana instance ID - it should be named as the first character of the module
-
-if ($id) {
-    $cm      = get_coursemodule_from_id ('codiana', $id, 0, false, MUST_EXIST);
-    $course  = $DB->get_record ('course', array ('id' => $cm->course), '*', MUST_EXIST);
-    $codiana = $DB->get_record ('codiana', array ('id' => $cm->instance), '*', MUST_EXIST);
-} elseif ($c) {
-    $codiana = $DB->get_record ('codiana', array ('id' => $c), '*', MUST_EXIST);
-    $course  = $DB->get_record ('course', array ('id' => $codiana->course), '*', MUST_EXIST);
-    $cm      = get_coursemodule_from_instance ('codiana', $codiana->id, $course->id, false, MUST_EXIST);
-} else {
-    error ('You must specify a course_module ID or an instance ID');
-}
+// grab course, context and codiana instance
+list($cm, $course, $codiana) = codiana_get_from_id ();
 
 require_login ($course, true, $cm);
 $context = context_module::instance ($cm->id);
@@ -53,12 +42,14 @@ add_to_log ($course->id, 'codiana', 'view', "view.php?id={$cm->id}", $codiana->n
 
 $PAGE->set_url ('/mod/codiana/view.php', array ('id' => $cm->id));
 $PAGE->set_title (format_string ($codiana->name));
-$PAGE->set_heading (format_string ($course->fullname));
+$PAGE->set_heading (codiana_create_page_title ($codiana));
 $PAGE->set_context ($context);
 $PAGE->requires->css ('/mod/codiana/html/css/view.css');
-//$PAGE->requires->jquery ();
+$PAGE->requires->jquery ();
+$PAGE->requires->js ('/mod/codiana/html/js/Chart.min.js', true);
 /** @var mod_codiana_renderer */
 $output = $PAGE->get_renderer ('mod_codiana');
+$output->init ($codiana, $cm, $context, $course, null);
 
 // other things you may want to set - remove if not needed
 //$PAGE->set_cacheable(false);
@@ -70,14 +61,39 @@ $output = $PAGE->get_renderer ('mod_codiana');
 
 //# ----- OUTPUT ----------------------------------------------------------------
 
-
-
-
 // Output starts here
 echo $OUTPUT->header ();
 
-$output->init ($codiana, $cm, $context, array (), $course);
-echo $output->view_page_guest ();
+if (has_capability ('mod/codiana:manager', $context)) {
+    $resolutions = codiana_get_stat_resolution ($codiana);
+
+    $stateStat       = codiana_get_stat ($codiana, 'state', $resolutions->state);
+    $resultFinalStat = codiana_get_stat ($codiana, 'resultfinal', $resolutions->resultfinal);
+    $timeStat        = codiana_get_stat ($codiana, 'runtime', $resolutions->runtime);
+    $memoryStat      = codiana_get_stat ($codiana, 'runmemory', $resolutions->runmemory);
+
+    $stats = array (
+        'state_stat'       => array ('data' => $stateStat, 'res' => $resolutions->state),
+        'resultfinal_stat' => array ('data' => $resultFinalStat, 'res' => $resolutions->resultfinal),
+        'time_stat'        => array ('data' => $timeStat, 'res' => $resolutions->runtime),
+        'memory_stat'      => array ('data' => $memoryStat, 'res' => $resolutions->runmemory),
+    );
+
+    echo $output->view_task_details (true);
+    echo $output->view_task_stats ($stats);
+} else {
+    $grades = grade_get_grades ($course->id, 'mod', 'codiana', $codiana->id, $USER->id);
+    $grade  = @$grades->items[0]->grades[$USER->id];
+
+    $attempt = codiana_get_user_grade_attempt ($codiana, $USER->id, array ('attempt.id', 'timesent', 'state', 'resultnote'));
+
+    if (codiana_is_task_open ($codiana) && codiana_is_task_active ($codiana)) {
+        echo $output->view_task_details (false, $grade, $attempt);
+    } else {
+        echo $output->view_page_not_active ($grade);
+    }
+
+}
 
 // Finish the page
 echo $OUTPUT->footer ();

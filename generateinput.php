@@ -29,23 +29,8 @@ require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
 
 global $DB;
 
-// grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
-
-// try to find right module or throw error
-if ($id) {
-    if (!$cm = get_coursemodule_from_id ('codiana', $id)) {
-        print_error ('invalidcoursemodule');
-    }
-    if (!$course = $DB->get_record ('course', array ('id' => $cm->course))) {
-        print_error ('coursemisconf');
-    }
-    if (!$codiana = $DB->get_record ('codiana', array ('id' => $cm->instance))) {
-        print_error ('invalidcoursemodule');
-    }
-} else {
-    print_error ('invalidcoursemodule');
-}
+// grab course, context and codiana instance
+list($cm, $course, $codiana) = codiana_get_from_id ();
 
 // check login and grap context
 require_login ($course, false, $cm);
@@ -57,8 +42,8 @@ require_capability ('mod/codiana:managetaskfiles', $context);
 // clean-up URL
 $url = new moodle_url('/mod/codiana/generateinput.php', array ('id' => $cm->id));
 $PAGE->set_url ($url);
-$PAGE->set_title ('Submit solution');
-$PAGE->set_heading ("Submitting solution to '$codiana->name'");
+$PAGE->set_title (codiana_string ('title:generate_input'));
+$PAGE->set_heading (codiana_create_page_title($codiana, 'title:generate_input'));
 $PAGE->set_pagelayout ('standard');
 $PAGE->requires->jquery ();
 $PAGE->requires->js ('/mod/codiana/html/js/sprintf.min.js', true);

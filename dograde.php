@@ -25,42 +25,28 @@
 
 require_once (dirname (__FILE__) . '/../../config.php');
 require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
-require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
+require_once ($CFG->libdir . '/gradelib.php');
 
-global $DB;
+global $DB, $USER;
 
 // grab course, context and codiana instance
 list($cm, $course, $codiana) = codiana_get_from_id ();
 
-$showAll = optional_param ('all', '0', PARAM_INT);
-$showAll = $showAll == 1;
-
-// check login and grap context
-require_login ($course, false, $cm);
-
-// ----- CAPABILITY viewresults ----------------------------------------------------------------
-
+require_login ($course, true, $cm);
 $context = context_module::instance ($cm->id);
-require_capability ('mod/codiana:viewresults', $context);
-
-// clean-up URL
-$url = new moodle_url('/mod/codiana/viewresults.php', array ('id' => $cm->id));
-$PAGE->set_url ($url);
-$PAGE->set_title (codiana_string ('title:view_all_attempts'));
-$PAGE->set_heading (codiana_create_page_title ($codiana, 'title:view_all_attempts'));
-$PAGE->set_pagelayout ('standard');
-$output = $PAGE->get_renderer ('mod_codiana');
-$output->init ($codiana, $cm, $context, $course);
-global $OUTPUT;
 
 
+// array of graded users
+$userids = @$_POST['userid'];
 
+if (!is_array ($userids) || empty ($userids))
+    redirect (new moodle_url('/mod/codiana/grade.php', array ('id' => $cm->id)), codiana_string ('message:nochangespermormed'));
 
-//# ----- OUTPUT ----------------------------------------------------------------
+$result = array ();
+foreach ($userids as $userid) {
+    $grade    = array ('userid' => $userid, 'rawgrade' => intval ($_POST["grade_$userid"]));
+    $result[] = grade_update ('mod/codiana', $course->id, 'mod', 'codiana', $codiana->id, 0, $grade);
+}
 
-$attempts = $showAll ? codiana_get_task_all_attempts ($codiana) : codiana_get_task_grade_attempts ($codiana);
-$plags    = codiana_get_task_plags ($codiana);
-
-echo $OUTPUT->header ();
-echo $output->view_page_viewresults ($attempts, $showAll, $plags);
-echo $OUTPUT->footer ();
+$total = count ($result);
+redirect (new moodle_url('/mod/codiana/grade.php', array ('id' => $cm->id)), codiana_string ('message:xchangesperformed', $total));

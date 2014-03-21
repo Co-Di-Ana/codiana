@@ -35,24 +35,11 @@ $type = required_param ('type', PARAM_ALPHA);
 if ($type != 'i' && $type != 'o')
     print_error ('invalidcoursemodule');
 
-// try to find right module or throw error
-if ($id) {
-    if (!$cm = get_coursemodule_from_id ('codiana', $id)) {
-        print_error ('invalidcoursemodule');
-    }
-    if (!$course = $DB->get_record ('course', array ('id' => $cm->course))) {
-        print_error ('coursemisconf');
-    }
-    if (!$codiana = $DB->get_record ('codiana', array ('id' => $cm->instance))) {
-        print_error ('invalidcoursemodule');
-    }
-} else {
-    print_error ('invalidcoursemodule');
-}
+
+// grab course, context and codiana instance
+list($cm, $course, $codiana) = codiana_get_from_id ();
 
 $context = context_module::instance ($cm->id);
-
-
 
 // Check the contextlevel is as expected - if your plugin is a block, this becomes CONTEXT_BLOCK, etc.
 if ($context->contextlevel != CONTEXT_MODULE) {
@@ -61,7 +48,6 @@ if ($context->contextlevel != CONTEXT_MODULE) {
 
 // check login and grap context
 require_login ($course, false, $cm);
-
 
 // clean-up URL
 $url = new moodle_url(
@@ -73,6 +59,7 @@ $url = new moodle_url(
 );
 
 // ----- CAPABILITY managetaskfiles ----------------------------------------------------------------
+
 // throw error if user doesn't have sufficient permissions
 $context = context_module::instance ($cm->id);
 require_capability ('mod/codiana:managetaskfiles', $context);

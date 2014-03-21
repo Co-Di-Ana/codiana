@@ -301,6 +301,7 @@ class admin_setting_configmulticheckbox_base_group extends admin_setting {
      * @return string XHTML field
      */
     public function output_html ($data, $query = '') {
+        // TODO add title here
         $output = html_writer::tag ('h1', $this->get_setting ());
         foreach ($this->items as $item)
             $output .= $item->output_html ($data, $query);

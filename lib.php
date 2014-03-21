@@ -50,6 +50,8 @@ function codiana_supports ($feature) {
             return true;
         case FEATURE_SHOW_DESCRIPTION:
             return true;
+        case FEATURE_GRADE_HAS_GRADE:
+            return true;
 
         default:
             return null;
@@ -71,7 +73,7 @@ function codiana_supports ($feature) {
  *          false or a string error message on failure.
  */
 function codiana_add_instance (stdClass $codiana, mod_codiana_mod_form $mform = null) {
-    global $DB;
+    global $DB, $CFG;
 
     // data check
     $result = codiana_preprocess ($codiana);
@@ -79,6 +81,8 @@ function codiana_add_instance (stdClass $codiana, mod_codiana_mod_form $mform = 
     $codiana->timecreated  = time ();
     $codiana->timemodified = time ();
 
+    require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
+    $codiana->state = codiana_task_state::NOT_ACTIVE;
 
 
     return $DB->insert_record ('codiana', $codiana);
@@ -96,7 +100,7 @@ function codiana_add_instance (stdClass $codiana, mod_codiana_mod_form $mform = 
  * @param mod_codiana_mod_form $mform
  * @return boolean Success/Fail
  */
-function codiana_update_instance (stdClass $codiana, mod_codiana_mod_form $mform = null) {
+function codiana_update_instance ($codiana, mod_codiana_mod_form $mform = null) {
     global $DB;
 
     // data check
@@ -111,10 +115,10 @@ function codiana_update_instance (stdClass $codiana, mod_codiana_mod_form $mform
 
 /**
  *  Preprocesses given $codiana object
- * @param $codiana stdClass
+ * @param $codiana object
  * @return string|boolean return true on success or string error message
  */
-function codiana_preprocess (stdClass $codiana) {
+function codiana_preprocess ($codiana) {
     global $CFG;
     require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 
@@ -130,10 +134,12 @@ function codiana_preprocess (stdClass $codiana) {
     $codiana->timeopen  = codiana_parse_int (@$codiana->timeopen, null);
     $codiana->timeclose = codiana_parse_int (@$codiana->timeclose, null);
 
-    $codiana->maxusers    = codiana_parse_int (@$codiana->maxusers);
-    $codiana->maxattempts = codiana_parse_int (@$codiana->maxattempts);
-    $codiana->limittime   = codiana_parse_int (@$codiana->limittime);
-    $codiana->limitmemory = codiana_parse_int (@$codiana->limitmemory);
+    $codiana->maxusers           = !@$codiana->maxusers_enabled ? NULL : codiana_parse_int (@$codiana->maxusers);
+    $codiana->maxattempts        = !@$codiana->maxattempts_enabled ? NULL : codiana_parse_int (@$codiana->maxattempts);
+    $codiana->limittimefalling   = !@$codiana->limittime_enabled ? NULL : codiana_parse_int (@$codiana->limittimefalling);
+    $codiana->limittimenothing   = !@$codiana->limittime_enabled ? NULL : codiana_parse_int (@$codiana->limittimenothing);
+    $codiana->limitmemoryfalling = !@$codiana->limitmemory_enabled ? NULL : codiana_parse_int (@$codiana->limitmemoryfalling);
+    $codiana->limitmemorynothing = !@$codiana->limitmemory_enabled ? NULL : codiana_parse_int (@$codiana->limitmemorynothing);
 
     $codiana->solutionfile = @$codiana->solutionfile;
     $codiana->inputfile    = @$codiana->inputfile;
@@ -148,6 +154,7 @@ function codiana_preprocess (stdClass $codiana) {
     $codiana->groupmode  = @$codiana->groupmode;
 
     $codiana->settings = array_sum (@$codiana->setting);
+
 
     return true;
 }
@@ -164,16 +171,28 @@ function codiana_preprocess (stdClass $codiana) {
  * @return boolean Success/Failure
  */
 function codiana_delete_instance ($id) {
-    global $DB;
+    global $DB, $CFG;
 
     if (!$codiana = $DB->get_record ('codiana', array ('id' => $id))) {
         return false;
     }
-
-    # Delete any dependent records here #
-
+//
+    // delete everything realted to this codiana
     $DB->delete_records ('codiana', array ('id' => $codiana->id));
+    $DB->delete_records ('codiana_queue', array ('taskid' => $codiana->id));
+    $DB->delete_records ('codiana_attempt', array ('taskid' => $codiana->id));
+    $DB->delete_records ('codiana_plags', array ('taskid' => $codiana->id));
 
+
+    require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
+    $fileTransfer = codiana_get_file_transfer ();
+    $taskFolder   = codiana_get_task_file_path ($codiana, codiana_file_path_type::TASK_FOLDER);
+    $zipFile      = codiana_get_task_file_path ($codiana, codiana_file_path_type::ZIP_HIST_FILE);
+
+    if ($fileTransfer->exists ($taskFolder)) {
+        $fileTransfer->zipDir ($taskFolder, $zipFile);
+        $fileTransfer->deleteDir ($taskFolder);
+    }
     return true;
 }
 
@@ -469,52 +488,68 @@ function codiana_extend_navigation (navigation_node $navref, stdclass $course, s
  */
 function codiana_extend_settings_navigation (settings_navigation $settingsnav, navigation_node $codiananode = null) {
     global $PAGE, $CFG;
+    require_once ($CFG->dirroot . '/mod/codiana/locallib.php');
 
     $keys      = $codiananode->get_children_key_list ();
     $beforeKey = sizeof ($keys) > 0 ? $keys[0] : null;
     $context   = $PAGE->cm->context;
     $id        = $PAGE->cm->id;
+    list($cm, $course, $codiana) = codiana_get_from_id (null, false);
+
+    // can activate task
+    if (has_capability ('mod/codiana:manager', $context)) {
+        if ($codiana && codiana_is_task_active ($codiana)) {
+            $url  = new moodle_url('/mod/codiana/activate.php', array ('id' => $id, 'sesskey' => sesskey (), 'activate' => 0));
+            $node = navigation_node::create (codiana_string ('menu:deactivatetask'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_activate');
+            $codiananode->add_node ($node, $beforeKey);
+        } else {
+            $url  = new moodle_url('/mod/codiana/activate.php', array ('id' => $id, 'sesskey' => sesskey (), 'activate' => 1));
+            $node = navigation_node::create (codiana_string ('menu:activatetask'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_deactivate');
+            $codiananode->add_node ($node, $beforeKey);
+        }
+    }
+
+    if (has_capability ('mod/codiana:manager', $context)) {
+        $url  = new moodle_url('/mod/codiana/grade.php', array ('id' => $id, 'sesskey' => sesskey (), 'activate' => 0));
+        $node = navigation_node::create (codiana_string ('menu:managaegrades'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_grade');
+        $codiananode->add_node ($node, $beforeKey);
+    }
 
     // can submit solution
     if (has_capability ('mod/codiana:submitsolution', $context)) {
-        $url  = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Odevzdat řešení", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_submitsolution');
-        $codiananode->add_node ($node, $beforeKey);
+        if ($codiana && codiana_is_task_open ($codiana) && codiana_is_task_active ($codiana)) {
+            $url  = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $id, 'sesskey' => sesskey ()));
+            $node = navigation_node::create (codiana_string ('menu:submitsolution'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_submitsolution');
+            $codiananode->add_node ($node, $beforeKey);
+        }
     }
 
     // can view ones results
     if (has_capability ('mod/codiana:viewmyattempts', $context)) {
-        $url  = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Zobrazit výsledky", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_viewmyattempts');
-        $codiananode->add_node ($node, $beforeKey);
+        if ($codiana && codiana_has_task_started ($codiana) && codiana_is_task_active ($codiana)) {
+            $url  = new moodle_url('/mod/codiana/viewmyattempts.php', array ('id' => $id, 'sesskey' => sesskey ()));
+            $node = navigation_node::create (codiana_string ('menu:viewmyresults'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_viewmyattempts');
+            $codiananode->add_node ($node, $beforeKey);
+        }
     }
 
     // can manage task files
     if (has_capability ('mod/codiana:managetaskfiles', $context)) {
         $url  = new moodle_url('/mod/codiana/managefiles.php', array ('id' => $id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Manage files", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_managetaskfiles');
+        $node = navigation_node::create (codiana_string ('menu:managefiles'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_managetaskfiles');
         $codiananode->add_node ($node, $beforeKey);
 
         $url  = new moodle_url('/mod/codiana/generateinput.php', array ('id' => $id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("Generate input file", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_generateinput');
+        $node = navigation_node::create (codiana_string ('menu:generateinput', 'codiana'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_generateinput');
         $codiananode->add_node ($node, $beforeKey);
     }
 
     // can view all results
     if (has_capability ('mod/codiana:viewresults', $context)) {
         $url  = new moodle_url('/mod/codiana/viewresults.php', array ('id' => $id, 'sesskey' => sesskey ()));
-        $node = navigation_node::create ("View results", $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_viewresults');
+        $node = navigation_node::create (codiana_string ('menu:viewallresults'), $url, navigation_node::TYPE_SETTING, null, 'mod_codiana_viewresults');
         $codiananode->add_node ($node, $beforeKey);
     }
-
-//    $url = new moodle_url('/mod/codiana/submitsolution.php');
-//    $node = navigation_node::create (get_string ('view', 'codiana'), $url,
-//        navigation_node::TYPE_ROOTNODE, null, 'mod_codiana_view');
-//    $codiananode->add_node ($node);
-//    $codiananode->add_node (navigation_node::create ("ahoj"));
-//
-//    $keys = $codiananode->get_children_key_list ();
-//    print_r ($keys);
 }
 
 

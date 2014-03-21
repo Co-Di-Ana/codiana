@@ -27,7 +27,7 @@
     display: inline-block;
     margin-right: 8px;
     border-right: 1px solid #666;
-    padding: 2px 20px 2px  5px;
+    padding: 2px 20px 2px 5px;
     content: counter(codiana_code_counter, decimal-leading-zero);
     color: #666;
 }
@@ -41,3 +41,79 @@
     font-weight: bold;
     font-size: 1.3em;
 }
+
+.codiana_chart, .codiana_chart_title {
+    clear: both;
+    margin-top: 20px;
+}
+
+.codiana_chart > canvas {
+    float: left;
+    margin: 20px;
+}
+
+.codiana_chart td {
+    white-space: nowrap;
+}
+
+.codiana_chart .color {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    white-space: nowrap;
+}
+
+.codiana_chart .title {
+    display: inline-block;
+    height: 24px;
+    line-height: 24px;
+    padding-left: 5px;
+    padding-right: 15px;
+    white-space: nowrap;
+}
+@media
+only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px)  {
+
+    /* Force table to not be like tables anymore */
+    .codiana_chart_legend table,
+    .codiana_chart_legend thead,
+    .codiana_chart_legend tbody,
+    .codiana_chart_legend th,
+    .codiana_chart_legend td,
+    .codiana_chart_legend tr {
+        display: block;
+    }
+
+    /* Hide table headers (but not display: none;, for accessibility) */
+    .codiana_chart_legend thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .codiana_chart_legend tr { border: none; }
+
+    .codiana_chart_legend td {
+        /* Behave  like a "row" */
+        white-space: normal;
+        border: none;
+        border-bottom: none;
+        position: relative;
+        padding-left: 0%;
+    }
+}
+
+/*
+        color.style.display = 'inline-block';
+        color.style.background = d.hasOwnProperty('strokeColor') ? d.strokeColor : d.color;
+        color.style.width = '24px';
+        color.style.height = '24px';
+        color.style.lineHeight = '24px';
+
+        title.style.paddingLeft = '5px';
+        title.style.paddingRight = '15px';
+        title.style.lineHeight = '24px';
+        title.style.height = '24px';
+        title.style.display = 'inline-block';*/

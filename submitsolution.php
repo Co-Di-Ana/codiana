@@ -29,23 +29,8 @@ require_once ($CFG->dirroot . '/mod/codiana/formlib.php');
 
 global $DB;
 
-// grab course module id
-$id = optional_param ('id', 0, PARAM_INT);
-
-// try to find right module or throw error
-if ($id) {
-    if (!$cm = get_coursemodule_from_id ('codiana', $id)) {
-        print_error ('invalidcoursemodule');
-    }
-    if (!$course = $DB->get_record ('course', array ('id' => $cm->course))) {
-        print_error ('coursemisconf');
-    }
-    if (!$codiana = $DB->get_record ('codiana', array ('id' => $cm->instance))) {
-        print_error ('invalidcoursemodule');
-    }
-} else {
-    print_error ('invalidcoursemodule');
-}
+// grab course, context and codiana instance
+list($cm, $course, $codiana) = codiana_get_from_id ();
 
 // check login and grap context
 require_login ($course, false, $cm);
@@ -54,12 +39,22 @@ require_login ($course, false, $cm);
 $context = context_module::instance ($cm->id);
 require_capability ('mod/codiana:submitsolution', $context);
 
+// TODO dict
+// is task open?
+if (!codiana_is_task_open ($codiana))
+    print_error ('error:tasknotopen', 'codiana');
+
+// task not active
+if (!codiana_is_task_active ($codiana))
+    print_error ('error:tasknotactive', 'codiana');
+
+
 // clean-up URL
 $url = new moodle_url('/mod/codiana/submitsolution.php', array ('id' => $cm->id));
 
 $PAGE->set_url ($url);
-$PAGE->set_title ('Submit solution');
-$PAGE->set_heading ("Submitting solution to '$codiana->name'");
+$PAGE->set_title (codiana_string ('title:submit_solution'));
+$PAGE->set_heading (codiana_create_page_title($codiana, 'title:submit_solution'));
 $PAGE->set_pagelayout ('standard');
 global $OUTPUT;
 
@@ -69,7 +64,7 @@ global $OUTPUT;
 
 // grap total attempts and max attempts
 $totalAttempts = codiana_get_user_attempt_count ($codiana, $USER->id);
-$maxAttempts   = $codiana->maxattempts;
+$maxAttempts   = is_null ($codiana->maxattempts) ? INF : $codiana->maxattempts;
 $canSubmit     = $totalAttempts < $maxAttempts || has_capability ('mod/codiana:manager', $context);
 $lastAttempt   = codiana_get_last_attempt ($codiana, $USER->id);
 $warning       = $totalAttempts > 0 && $lastAttempt->state == codiana_attempt_state::WAITING_TO_PROCESS;
@@ -81,8 +76,11 @@ $maxUsers   = $codiana->maxusers;
 
 if (!$canSubmit) {
     echo $OUTPUT->header ();
-    echo html_writer::tag ('h1', 'No more attempts' . " ($totalAttempts / $maxAttempts)");
-    echo html_writer::tag ('p', 'You have reached limit of maximum possible attempts.');
+    echo html_writer::tag ('h1', codiana_string (
+        'message:no_more_attempts_x_of_x',
+        $totalAttempts, $maxAttempts
+    ));
+    echo html_writer::tag ('p', codiana_string ('message:maximum_no_of_attempts_reached'));
     echo $OUTPUT->footer ();
 
 } else {
@@ -93,8 +91,7 @@ if (!$canSubmit) {
 // Form processing and displaying
     if ($mform->is_cancelled ()) {
         // form canceled
-
-        echo $OUTPUT->header ();
+        redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)));
     } else if ($data = $mform->get_data ()) {
         // form is valid, now file check
 
@@ -128,22 +125,27 @@ if (!$canSubmit) {
             $DB->delete_records ('codiana_queue', array ('userid' => $USER->id));
         }
 
+        // TODO -1 nepocitat
         // redirect user to view
         $newAttemptNo = $totalAttempts + 1;
-        redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), "Uploaded $newAttemptNo. attempt");
+        redirect (new moodle_url('/mod/codiana/view.php', array ('id' => $cm->id)), codiana_string ('message:uploaded_x_attempt', $newAttemptNo));
 
     } else {
         // show form
 
         echo $OUTPUT->header ();
-        echo html_writer::tag ('h2', sprintf ('Attempt %d / %d', $totalAttempts + 1, $maxAttempts));
+        echo html_writer::tag ('h2', codiana_string (
+            'message:attempt_x_from_x',
+            $totalAttempts + 1,
+            is_infinite ($maxAttempts) ? "∞" : "$maxAttempts"
+        ));
         $mform->display ($codiana, $cm, $course);
 
         if ($warning)
-            echo html_writer::tag ('h4', get_string ('abortedsolution:warning', 'codiana'));
+            echo html_writer::tag ('h4', codiana_string ('warning:abortedsolution'));
     }
 
+    // TODO cancel empty screen? :D
 
     echo $OUTPUT->footer ();
-
 }
